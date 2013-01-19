@@ -1,3 +1,5 @@
-CS 370 - Operating Systems
+### CS 370 - Operating Systems ###
+
 Prof. Willian Mongan
-Team - Ayush Sobti, Lakshit Dhanda
+
+*Team* - Ayush Sobti, Lakshit Dhanda
