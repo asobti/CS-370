@@ -7157,7 +7157,7 @@ void normalize_rt_tasks(void)
 
 #endif /* CONFIG_MAGIC_SYSRQ */
 
-#ifdef CONFIG_IA64
+#if	defined(CONFIG_IA64) || defined(CONFIG_KDB)
 /*
  * These functions are only useful for the IA64 MCA handling.
  *
@@ -7200,3 +7200,10 @@ void set_curr_task(int cpu, struct task_struct *p)
 }
 
 #endif
+
+// implementation of sys_mygetpid
+// header prototype in syscalls.h
+asmlinkage long sys_mygetpid(void) {
+	  return current->tgid;
+}
+
