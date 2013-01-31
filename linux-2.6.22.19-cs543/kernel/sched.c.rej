@@ -1,5 +1,14 @@
 --- kernel/sched.c
 +++ kernel/sched.c
+@@ -7157,7 +7157,7 @@
+ 
+ #endif /* CONFIG_MAGIC_SYSRQ */
+ 
+-#ifdef CONFIG_IA64
++#if	defined(CONFIG_IA64) || defined(CONFIG_KDB)
+ /*
+  * These functions are only useful for the IA64 MCA handling.
+  *
 @@ -7200,3 +7200,80 @@
  }
  

@@ -7206,4 +7206,3 @@ void set_curr_task(int cpu, struct task_struct *p)
 asmlinkage long sys_mygetpid(void) {
 	  return current->tgid;
 }
-

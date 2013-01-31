@@ -1,0 +1,10 @@
+--- include/asm-x86_64/kmap_types.h
++++ include/asm-x86_64/kmap_types.h
+@@ -13,6 +13,7 @@
+ 	KM_IRQ1,
+ 	KM_SOFTIRQ0,
+ 	KM_SOFTIRQ1,
++	KM_KDB,
+ 	KM_TYPE_NR
+ };
+ 

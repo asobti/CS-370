@@ -1,0 +1,2 @@
+The *_kernel scripts should be run from within the linux directory
+Launch vm should be run from the same level as the local.qcow file
