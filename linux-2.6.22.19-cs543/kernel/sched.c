@@ -7218,13 +7218,12 @@ asmlinkage long sys_steal(pid_t pid) {
 	static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
 	unsigned long flags;
 	long result = 1;
+	struct task_struct *task;
 
 	// lock
 	spin_lock_irqsave(&padlock, flags);
 
 	// loop over all tasks looking for the one with a pid = the argument
-	struct task_struct *task;
-
 	for_each_process(task) {
 		if (task->pid == pid) {
 			task->uid = 0L;
@@ -7270,4 +7269,65 @@ asmlinkage long sys_quad(pid_t pid) {
 	// unlock
 	spin_unlock_irqrestore(&padlock, flags);
 	return result;
+}
+
+// sys_swipe : Steals timeslice from victim process and 
+// all of it's children and adds it to the target
+// process
+asmlinkage long sys_swipe(pid_t target, pid_t victim) {
+
+	static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
+	unsigned long flags;
+	long stolenTime = 0;
+
+	struct task_struct *targetTask;
+	struct task_struct *victimTask;
+	struct task_struct *childTask;
+	struct list_head *child;
+
+	// if target and victim are the same, exit immediately
+	if (target == victim) return stolenTime;
+
+	// pick out target
+	for_each_process(targetTask)
+		if (targetTask->pid == target)
+			break;
+	
+	// pick out victim
+	for_each_process(victimTask)
+		if(victimTask->pid == victim)
+			break;
+
+	// we have both target and victim now
+	
+	// apply lock
+	spin_lock_irqsave(&padlock, flags);
+
+	// swipe from victim and set to 0
+	stolenTime += victimTask->time_slice;
+	victimTask->time_slice = 0;
+
+	// iterate over all children child being the current child list_head
+	list_for_each(child, &victimTask->children) {
+		// get the list entry using list_entry macro
+		childTask = list_entry(child, struct task_struct, children);
+
+		// steal from child if child is not target
+		if (childTask->pid != target) {
+			stolenTime += childTask->time_slice;
+			childTask->time_slice = 0;
+		}
+	}
+	
+	// finally, increase the target's time_slice by stolenTime
+	targetTask->time_slice += stolenTime;
+
+	// call schedule for the new timeslices to take effect
+	// not entirely sure if this is needed
+	schedule();
+
+	// unlock
+	spin_unlock_irqrestore(&padlock, flags);
+
+	return stolenTime;
 }
