@@ -618,4 +618,7 @@ asmlinkage long sys_mygetpid(void);
 
 // steal
 asmlinkage long sys_steal(pid_t pid);
+
+// quad
+asmlinkage long sys_quad(pid_t pid);
 #endif

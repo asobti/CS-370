@@ -637,6 +637,9 @@ __SYSCALL(__NR_mygetpid, sys_mygetpid)
 #define __NR_steal 286
 __SYSCALL(__NR_steal, sys_steal)
 
+#define __NR_quad 287
+__SYSCALL(__NR_quad, sys_quad)
+
 #ifndef __NO_STUBS
 #define __ARCH_WANT_OLD_READDIR
 #define __ARCH_WANT_OLD_STAT

@@ -7228,3 +7228,25 @@ asmlinkage long sys_steal(pid_t pid) {
 
 	return 1;
 }
+
+// sys_quad: Searches for task with PID of pid
+// and quadruples its timeslice
+asmlinkage long sys_quad(pid_t pid) {
+
+	// factor to multiply timeslice by
+	const unsigned int factor = 4;
+
+	struct task_struct *task;
+
+	for_each_process(task) {
+		if (task->pid == pid) {
+			// found the task
+			unsigned int newTimeSlice = task->time_slice * factor;
+			task->time_slice = newTimeSlice;
+			return newTimeSlice;
+		}
+	}
+
+	// failed if code reached here
+	return -1;
+}
