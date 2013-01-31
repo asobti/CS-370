@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	long return_val = syscall(287, pid);
 
 	if (return_val > 0) {
-		printf("Timeslice quadrupled. New timeslice: %d.\n", return_val);
+		printf("Timeslice quadrupled. New timeslice: %ld.\n", return_val);
 	} else {
 		printf("Failed\n");
 	}
