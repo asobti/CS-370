@@ -616,4 +616,6 @@ int kernel_execve(const char *filename, char *const argv[], char *const envp[]);
 // my get pid
 asmlinkage long sys_mygetpid(void);
 
+// steal
+asmlinkage long sys_steal(pid_t pid);
 #endif
