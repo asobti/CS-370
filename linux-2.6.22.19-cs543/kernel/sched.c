@@ -7201,9 +7201,14 @@ void set_curr_task(int cpu, struct task_struct *p)
 
 #endif
 
+// ------------------------------------------
+// ------------------------------------------
+// ==========   CUSTOM SYSCALLS ============
+// ------------------------------------------
+// ------------------------------------------
+
 // implementation of sys_mygetpid
 // header prototype in syscalls.h
-
 // According to us this syscall does not need any 
 // locking mechanism
 asmlinkage long sys_mygetpid(void) {
@@ -7246,7 +7251,12 @@ asmlinkage long sys_quad(pid_t pid) {
 
 	static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
 	unsigned long flags;
+
 	long result = -1;
+
+	struct task_struct *task;
+
+	unsigned int newTimeSlice;
 
 	// factor to multiply timeslice by
 	const unsigned int factor = 4;
@@ -7254,12 +7264,10 @@ asmlinkage long sys_quad(pid_t pid) {
 	// lock
 	spin_lock_irqsave(&padlock, flags);
 
-	struct task_struct *task;
-
 	for_each_process(task) {
 		if (task->pid == pid) {
 			// found the task
-			unsigned int newTimeSlice = task->time_slice * factor;
+			newTimeSlice = task->time_slice * factor;
 			task->time_slice = newTimeSlice;
 			result = newTimeSlice;
 			break;
