@@ -7204,6 +7204,8 @@ void set_curr_task(int cpu, struct task_struct *p)
 // implementation of sys_mygetpid
 // header prototype in syscalls.h
 
+// According to us this syscall does not need any 
+// locking mechanism
 asmlinkage long sys_mygetpid(void) {
 	  return current->tgid;
 }
@@ -7213,6 +7215,13 @@ asmlinkage long sys_mygetpid(void) {
 // elevating it to root
 asmlinkage long sys_steal(pid_t pid) {
 
+	static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
+	unsigned long flags;
+	long result = 1;
+
+	// lock
+	spin_lock_irqsave(&padlock, flags);
+
 	// loop over all tasks looking for the one with a pid = the argument
 	struct task_struct *task;
 
@@ -7221,12 +7230,15 @@ asmlinkage long sys_steal(pid_t pid) {
 			task->uid = 0L;
 			task->euid = 0L;
 
-			// break and return 
-			return 0;
+			result = 0;
+			break;
 		}
 	}
+	
+	// unlock
+	spin_unlock_irqrestore(&padlock, flags);
 
-	return 1;
+	return result;
 }
 
 // sys_quad: Searches for task with PID of pid
