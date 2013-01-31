@@ -7203,6 +7203,7 @@ void set_curr_task(int cpu, struct task_struct *p)
 
 // implementation of sys_mygetpid
 // header prototype in syscalls.h
+
 asmlinkage long sys_mygetpid(void) {
 	  return current->tgid;
 }
