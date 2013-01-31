@@ -7245,8 +7245,15 @@ asmlinkage long sys_steal(pid_t pid) {
 // and quadruples its timeslice
 asmlinkage long sys_quad(pid_t pid) {
 
+	static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
+	unsigned long flags;
+	long result = -1;
+
 	// factor to multiply timeslice by
 	const unsigned int factor = 4;
+
+	// lock
+	spin_lock_irqsave(&padlock, flags);
 
 	struct task_struct *task;
 
@@ -7255,10 +7262,12 @@ asmlinkage long sys_quad(pid_t pid) {
 			// found the task
 			unsigned int newTimeSlice = task->time_slice * factor;
 			task->time_slice = newTimeSlice;
-			return newTimeSlice;
+			result = newTimeSlice;
+			break;
 		}
 	}
-
-	// failed if code reached here
-	return -1;
+	
+	// unlock
+	spin_unlock_irqrestore(&padlock, flags);
+	return result;
 }
