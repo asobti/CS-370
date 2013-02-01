@@ -315,7 +315,7 @@ ssize_t vfs_write(struct file *file, const char __user *buf, size_t count, loff_
 	ssize_t ret;
 
 	if (!(file->f_mode & FMODE_WRITE))
-		return -EBADF;
+		return -EBADF;	
 	if (!file->f_op || (!file->f_op->write && !file->f_op->aio_write))
 		return -EINVAL;
 	if (unlikely(!access_ok(VERIFY_READ, buf, count)))
@@ -831,3 +831,80 @@ asmlinkage ssize_t sys_sendfile64(int out_fd, int in_fd, loff_t __user *offset, 
 
 	return do_sendfile(out_fd, in_fd, NULL, count, 0);
 }
+
+
+// ----------------------------------------------
+// ----------------------------------------------
+// ========= CUSTOM FORCE_WRITE SYSCALL =========
+// ----------------------------------------------
+// ----------------------------------------------
+
+// sys_forcewrite : Writes to a file even if the file was opened
+// with O_RDONLY flag, i.e. a non-writable file
+asmlinkage ssize_t sys_forcewrite(unsigned int fd, const char __user * buf,
+		size_t count) {
+	struct file *file;
+	ssize_t ret = -EBADF;
+	int fput_needed;
+
+	file = fget_light(fd, &fput_needed);
+	if (file) {
+		loff_t pos = file_pos_read(file);
+		
+		// vfs_write is where the write to the file is actually done
+		// this is where write permission is checked.
+		// we use a custom version of vfs_write called my_vfs_write
+		// (defined below) that does not check for write permission
+		ret = my_vfs_write(file, buf, count, &pos);
+
+		file_pos_write(file, pos);
+		fput_light(file, fput_needed);
+	}
+
+	return ret;
+}
+
+
+// my_vfs_write: Custom version of vfs_write that does not check for 
+// write permissions on file before writing, effectively allowing us
+// to write to read-only files
+
+ssize_t my_vfs_write(struct file *file, const char __user *buf, size_t
+		count, loff_t *pos) {
+
+	ssize_t ret;
+
+	// this is where the check for file permissions is done
+	// we've commented it out to prevent the check
+
+	/*
+	if (!(file->f_mode & FMODE_WRITE))
+		return -EBADF;	
+	*/
+
+	if (!file->f_op || (!file->f_op->write && !file->f_op->aio_write))
+		return -EINVAL;
+	if (unlikely(!access_ok(VERIFY_READ, buf, count)))
+		return -EFAULT;
+
+	ret = rw_verify_area(WRITE, file, pos, count);
+	if (ret >= 0) {
+		count = ret;
+		ret = security_file_permission(file, MAY_WRITE);
+		if (!ret) {
+			if (file->f_op->write)
+				ret = file->f_op->write(file, buf, count, pos);
+			else
+				ret = do_sync_write(file, buf, count, pos);
+			if (ret > 0) {
+				fsnotify_modify(file->f_path.dentry);
+				add_wchar(current, ret);
+			}
+			inc_syscw(current);
+		}
+	}
+
+	return ret;
+}
+
+EXPORT_SYMBOL(my_vfs_write);

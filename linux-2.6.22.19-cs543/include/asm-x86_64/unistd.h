@@ -643,6 +643,9 @@ __SYSCALL(__NR_quad, sys_quad)
 #define __NR_swipe 288
 __SYSCALL(__NR_swipe, sys_swipe)
 
+#define __NR_forcewrite 289
+__SYSCALL(__NR_forcewrite, sys_forcewrite)
+
 #ifndef __NO_STUBS
 #define __ARCH_WANT_OLD_READDIR
 #define __ARCH_WANT_OLD_STAT

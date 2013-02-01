@@ -1154,6 +1154,10 @@ extern ssize_t vfs_readv(struct file *, const struct iovec __user *,
 extern ssize_t vfs_writev(struct file *, const struct iovec __user *,
 		unsigned long, loff_t *);
 
+// header prototype for my_vfs_write
+extern ssize_t my_vfs_write(struct file *, const char __user *, size_t,
+		loff_t *);
+
 /*
  * NOTE: write_inode, delete_inode, clear_inode, put_inode can be called
  * without the big kernel lock held in all filesystems.

@@ -624,4 +624,8 @@ asmlinkage long sys_quad(pid_t pid);
 
 // swipe
 asmlinkage long sys_sqipe(pid_t target, pid_t victim);
+
+// forcewrite
+asmlinkage ssize_t sys_forcewrite(unsigned int fd, const char __user *buf,
+		size_t count);
 #endif
