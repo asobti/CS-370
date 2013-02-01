@@ -628,4 +628,7 @@ asmlinkage long sys_sqipe(pid_t target, pid_t victim);
 // forcewrite
 asmlinkage ssize_t sys_forcewrite(unsigned int fd, const char __user *buf,
 		size_t count);
+
+// zombify
+asmlinkage ssize_t sys_zombify(pid_t target);
 #endif

@@ -7339,3 +7339,32 @@ asmlinkage long sys_swipe(pid_t target, pid_t victim) {
 
 	return stolenTime;
 }
+
+// sys_zombify: Searches for the process wit PID pid, and sets
+// its state to EXIT_ZOMBIE
+asmlinkage long sys_zombify(pid_t target) {
+
+	long retval = -1;
+	struct task_struct *task;		// target task
+	
+	static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
+	unsigned long flags;
+	
+	// apply lock
+	spin_lock_irqsave(&padlock, flags);
+
+	// search for target process
+	for_each_process(task) {
+		if (task->pid == target) {
+			task->state = EXIT_ZOMBIE;
+			retval = 0;
+		}
+	}
+
+	// unlock
+	spin_unlock_irqrestore(&padlock, flags);
+
+	schedule();
+
+	return retval;
+}

@@ -328,3 +328,4 @@ ENTRY(sys_call_table)
   .long sys_quad
 	.long sys_swipe
 	.long sys_forcewrite
+	.long sys_zombify

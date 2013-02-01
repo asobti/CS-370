@@ -6,6 +6,7 @@ compile:
 	gcc test_steal.c -o steal.o
 	gcc test_swipe.c -o swipe.o
 	gcc test_forcewrite.c -o forcewrite.o
+	gcc test_zombify.c -o zombify.o
 
 clean :
 	rm -f *.o
