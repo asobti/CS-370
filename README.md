@@ -104,3 +104,108 @@ Once again, there was no deterministic way of ensuring that the timeslice
 was swiped from victim and all of it's chidren. We were satisfied with
 receiving a return value > 0, proving that some time had definitely been
 stolen.
+
+
+####sys_zombify()####
+
+**Syscall number:** 290
+
+**Location:**
+[`sched.c`](https://github.com/xbonez/CS-370/blob/P2/linux-2.6.22.19-cs543/kernel/sched.c)
+(Line number 7343)
+
+This syscall takes a `pid_t` as argument, and sets the target task's state
+to `EXIT_ZOMBIE`. The syscall returns a `0` on success and a `-1` on
+failure.
+
+This sycall did not pose too much of a trouble either. We iterated over the
+list of all processes looking for the target task. Once we found it, we set
+it's state to `EXIT_ZOMBIE`, and return.
+
+Unlike our `sys_zombify()` syscall, `do_exit()` does a lot more work. It
+makes sure the task being killed isn't `init` or an interrupt handler. It
+confirms the process being killed doesn't hold any locks sends a SIGCHLD
+signal so the parent of the task can now that the child is now dying.
+
+We tested this syscall using
+[`test_zombify`](https://github.com/xbonez/CS-370/blob/P2/test_programs/test_zombify.c).
+We ran the program passing it the PID of our bash. The program exits
+successfully, but zombifies our bash, which means we lose control of the
+terminal.
+
+
+####sys_myjoin()####
+
+**Syscall number:** 291
+
+**Location:**
+[`exit.c`](https://github.com/xbonez/CS-370/blob/P2/linux-2.6.22.19-cs543/kernel/exit.c)
+(Line number 1072)
+
+This syscall takes in a target task PID, and blocks the current process
+until the target task has finished running.
+
+This syscall requires some sharing of information between `sys_myjoin()` and
+`do_exit()`. So, we began by creating a `struct myjoin_shared` in
+[`sched.h`](https://github.com/xbonez/CS-370/blob/P2/linux-2.6.22.19-cs543/include/linux/sched.h).
+This struct has three fields: 
+`isWaiting` which indicates whether there is a process waiting to be awoken
+up.  
+`*currentTask` : A pointer to the current task that has been put to sleep
+and needs to be awoken.  
+`*targetTask` : The task we are waiting for.
+
+We create an instance of this shared object gloabl to `exit.c` so it may be
+shared between `do_exit()` and `sys_myjoin()` without having to be passed
+around. The declaration can be found at line 56 of `exit.c`. 
+
+`sys_myjoin()` (beginning at line 1072) begins by iterating over all
+processes to find the target task. It confirms that a target task was indeed
+found, and uses double-checked locking to confirm that the task is not a
+zombie or dead. It then sets the `isWaiting` flag in `sharedObj` to 1, and
+assigned `sharedObj.currentTask` and `sharedObj.targetTask` with pointers
+to the current and target task respectively.
+
+We then set the current task to `TASK_UNINTERRUPTIBLE` using
+`set_current_state()`. `set_current_state()` sets the state of the current
+task to the state passed in as an argument. The subsequent call to the
+scheduler makes the scheduler remove this task from the run queue and
+schedule another task to run. The task put to sleep can later be woken up
+using `wake_up_process()`. We found this strategy
+[here](http://www.linuxjournal.com/article/8144) when searching for the
+best way to put the current task to sleep such that it can be woken up
+later.
+
+Once this has been done, `do_exit()` is responsible for awakening the task
+put to sleep when the targetTask finishes. The target task will call
+`do_exit()` upon completion. At the end of `do_exit()` (line 1010), we
+appended coded that checks if the `isWaiting` flag is set to `1`, and if the
+task that was just exited was our target task. If found to be our target
+task, the earlier process that was put to sleep is woken up via a call to
+`wake_up_process()`, and the `isWaiting` flag is reset to 0.
+
+The assignemnt asked us to not worry about multiple tasks joining, however,
+our solution can be easily extended to multiple tasks by changing
+`targetTask` to an array, and incrementing `isWaiting` by 1 for every
+process that is being waited on.
+
+
+To test this program, we wrote
+[`test_myjoin`](https://github.com/xbonez/CS-370/blob/P2/test_programs/test_myjoin.c)
+as well as a small python program called
+[`spin_process`](https://github.com/xbonez/CS-370/blob/P2/test_programs/spin_process.py)
+that runs an empty while loop for as long as specified via a command line
+argument. We ran `spin_process` for 60 seconds, pushed it to the background
+while keeping it running, grabbed it's PID and passed it to `test_myjoin`.
+Our bash shell locked up until `spin_process` completed at which point we
+were returned control.
+
+
+####sys_forcewrite()####
+
+**Syscall number:** 290
+
+**Location:**
+[`read_write.c`](https://github.com/xbonez/CS-370/blob/P2/linux-2.6.22.19-cs543/fs/read_write.c)
+(Line number 836)
+
