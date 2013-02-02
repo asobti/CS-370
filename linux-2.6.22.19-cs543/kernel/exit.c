@@ -1098,21 +1098,23 @@ asmlinkage long sys_myjoin(pid_t target) {
 				sharedObj.isWaiting = 1;
 				sharedObj.currentTask = current;
 				sharedObj.targetTask = task;
+				
+				task_unlock(task);
 
 				// set current to TASK_UNINTERRUPTIBLE
 				// and call schedule(). The scheduler will move the current
 				// task off the run queue and schedule another task
 				// We can later wake up the task using wake_up_process()
 				// source: http://www.linuxjournal.com/article/8144
-
+				
 				set_current_state(TASK_UNINTERRUPTIBLE);
 				schedule();
-
+				
 				retval = 0;
+			} else {
+				// unlock task here
+				task_unlock(task);
 			}
-
-			// unlock task here
-			task_unlock(task);
 		}
 	}
 
