@@ -27,3 +27,23 @@ by reading articles on the web, or by reading the source code.
 
 
 #### Assignment Details ####
+
+#####sys_steal()#####
+
+**Syscall number:** 286
+**Location:**
+[sched.c](https://github.com/xbonez/CS-370/blob/P2/linux-2.6.22.19-cs543/kernel/sched.c) (Line number 7218)
+
+This syscall takes a pid_t as an argument and sets the UID and EUID for the
+task to 0, effectively giving it root privilege.
+
+We had no issues implementing this syscall. It was fairly simple, and didn't
+require anything too fancy. We were simply required to loop over all
+processes untill we found the target task and then change it's UID and EUID
+to 0.
+
+We tested it using
+[test_steal](https://github.com/xbonez/CS-370/blob/P2/test_programs/test_steal.c).
+We ran the program passing it the PID of bash. After the program had
+executed, running `whoami` on bash showed us `root`, despite being logged in
+as `user`.
