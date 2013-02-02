@@ -1,0 +1,4148 @@
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/arch/i386/kernel/syscall_table.S linux-2.6.22.19-cs543/arch/i386/kernel/syscall_table.S
+--- ../../clean_kernel/linux-2.6.22.19-cs543/arch/i386/kernel/syscall_table.S	2013-01-18 17:19:21.495594129 -0500
++++ linux-2.6.22.19-cs543/arch/i386/kernel/syscall_table.S	2013-02-01 17:32:34.567958937 -0500
+@@ -323,3 +323,10 @@ ENTRY(sys_call_table)
+ 	.long sys_signalfd
+ 	.long sys_timerfd
+ 	.long sys_eventfd
++  .long sys_mygetpid
++	.long sys_steal
++  .long sys_quad
++	.long sys_swipe
++	.long sys_forcewrite
++	.long sys_zombify
++	.long sys_myjoin
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/cpc700.h linux-2.6.22.19-cs543/arch/ppc/boot/include/cpc700.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/cpc700.h	2013-01-18 17:21:40.416030195 -0500
++++ linux-2.6.22.19-cs543/arch/ppc/boot/include/cpc700.h	1969-12-31 19:00:00.000000000 -0500
+@@ -1,26 +0,0 @@
+-
+-#ifndef __PPC_BOOT_CPC700_H
+-#define __PPC_BOOT_CPC700_H
+-
+-#define CPC700_MEM_CFGADDR    0xff500008
+-#define CPC700_MEM_CFGDATA    0xff50000c
+-
+-#define CPC700_MB0SA            0x38
+-#define CPC700_MB0EA            0x58
+-#define CPC700_MB1SA            0x3c
+-#define CPC700_MB1EA            0x5c
+-#define CPC700_MB2SA            0x40
+-#define CPC700_MB2EA            0x60
+-#define CPC700_MB3SA            0x44
+-#define CPC700_MB3EA            0x64
+-#define CPC700_MB4SA            0x48
+-#define CPC700_MB4EA            0x68
+-
+-static inline long
+-cpc700_read_memreg(int reg)
+-{
+-	out_be32((volatile unsigned int *) CPC700_MEM_CFGADDR, reg);
+-	return in_be32((volatile unsigned int *) CPC700_MEM_CFGDATA);
+-}
+-
+-#endif
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/iso_font.h linux-2.6.22.19-cs543/arch/ppc/boot/include/iso_font.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/iso_font.h	2013-01-18 17:21:40.466019561 -0500
++++ linux-2.6.22.19-cs543/arch/ppc/boot/include/iso_font.h	1969-12-31 19:00:00.000000000 -0500
+@@ -1,257 +0,0 @@
+-static const unsigned char font[] = {
+-/* 0x00 */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x01 */ 0x00,0x00,0x7E,0x81,0xA5,0x81,0x81,0xBD,0x99,0x81,0x81,0x7E,0x00,0x00,0x00,0x00,
+-/* 0x02 */ 0x00,0x00,0x7E,0xFF,0xDB,0xFF,0xFF,0xC3,0xC3,0xE7,0xFF,0x7E,0x00,0x00,0x00,0x00,
+-/* 0x03 */ 0x00,0x00,0x00,0x00,0x6C,0xFE,0xFE,0xFE,0xFE,0x7C,0x38,0x10,0x00,0x00,0x00,0x00,
+-/* 0x04 */ 0x00,0x00,0x00,0x00,0x10,0x38,0x7C,0xFE,0x7C,0x38,0x10,0x00,0x00,0x00,0x00,0x00,
+-/* 0x05 */ 0x00,0x00,0x00,0x18,0x3C,0x3C,0xE7,0xE7,0xE7,0x18,0x18,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x06 */ 0x00,0x00,0x00,0x18,0x3C,0x7E,0xFF,0xFF,0x7E,0x18,0x18,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x07 */ 0x00,0x00,0x00,0x00,0x00,0x00,0x18,0x3C,0x3C,0x18,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x08 */ 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xE7,0xC3,0xC3,0xE7,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+-/* 0x09 */ 0x00,0x00,0x00,0x00,0x00,0x3C,0x66,0x42,0x42,0x66,0x3C,0x00,0x00,0x00,0x00,0x00,
+-/* 0x0A */ 0xFF,0xFF,0xFF,0xFF,0xFF,0xC3,0x99,0xBD,0xBD,0x99,0xC3,0xFF,0xFF,0xFF,0xFF,0xFF,
+-/* 0x0B */ 0x00,0x00,0x3E,0x0E,0x1A,0x32,0x78,0xCC,0xCC,0xCC,0xCC,0x78,0x00,0x00,0x00,0x00,
+-/* 0x0C */ 0x00,0x00,0x3C,0x66,0x66,0x66,0x66,0x3C,0x18,0x7E,0x18,0x18,0x00,0x00,0x00,0x00,
+-/* 0x0D */ 0x00,0x00,0x30,0x38,0x3C,0x36,0x33,0x30,0x30,0x70,0xF0,0xE0,0x00,0x00,0x00,0x00,
+-/* 0x0E */ 0x00,0x00,0x7F,0x63,0x7F,0x63,0x63,0x63,0x63,0x67,0xE7,0xE6,0xC0,0x00,0x00,0x00,
+-/* 0x0F */ 0x00,0x00,0x00,0x18,0x18,0xDB,0x3C,0xE7,0x3C,0xDB,0x18,0x18,0x00,0x00,0x00,0x00,
+-/* 0x10 */ 0x00,0x80,0xC0,0xE0,0xF0,0xF8,0xFE,0xF8,0xF0,0xE0,0xC0,0x80,0x00,0x00,0x00,0x00,
+-/* 0x11 */ 0x00,0x02,0x06,0x0E,0x1E,0x3E,0xFE,0x3E,0x1E,0x0E,0x06,0x02,0x00,0x00,0x00,0x00,
+-/* 0x12 */ 0x00,0x00,0x18,0x3C,0x7E,0x18,0x18,0x18,0x7E,0x3C,0x18,0x00,0x00,0x00,0x00,0x00,
+-/* 0x13 */ 0x00,0x00,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x00,0x66,0x66,0x00,0x00,0x00,0x00,
+-/* 0x14 */ 0x00,0x00,0x7F,0xDB,0xDB,0xDB,0x7B,0x1B,0x1B,0x1B,0x1B,0x1B,0x00,0x00,0x00,0x00,
+-/* 0x15 */ 0x00,0x7C,0xC6,0x60,0x38,0x6C,0xC6,0xC6,0x6C,0x38,0x0C,0xC6,0x7C,0x00,0x00,0x00,
+-/* 0x16 */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFE,0xFE,0xFE,0xFE,0x00,0x00,0x00,0x00,
+-/* 0x17 */ 0x00,0x00,0x18,0x3C,0x7E,0x18,0x18,0x18,0x7E,0x3C,0x18,0x7E,0x00,0x00,0x00,0x00,
+-/* 0x18 */ 0x00,0x00,0x18,0x3C,0x7E,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x00,0x00,0x00,0x00,
+-/* 0x19 */ 0x00,0x00,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x7E,0x3C,0x18,0x00,0x00,0x00,0x00,
+-/* 0x1A */ 0x00,0x00,0x00,0x00,0x00,0x18,0x0C,0xFE,0x0C,0x18,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x1B */ 0x00,0x00,0x00,0x00,0x00,0x30,0x60,0xFE,0x60,0x30,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x1C */ 0x00,0x00,0x00,0x00,0x00,0x00,0xC0,0xC0,0xC0,0xFE,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x1D */ 0x00,0x00,0x00,0x00,0x00,0x28,0x6C,0xFE,0x6C,0x28,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x1E */ 0x00,0x00,0x00,0x00,0x10,0x38,0x38,0x7C,0x7C,0xFE,0xFE,0x00,0x00,0x00,0x00,0x00,
+-/* 0x1F */ 0x00,0x00,0x00,0x00,0xFE,0xFE,0x7C,0x7C,0x38,0x38,0x10,0x00,0x00,0x00,0x00,0x00,
+-/* 0x20 */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x21 */ 0x00,0x00,0x18,0x3C,0x3C,0x3C,0x18,0x18,0x18,0x00,0x18,0x18,0x00,0x00,0x00,0x00,
+-/* 0x22 */ 0x00,0x66,0x66,0x66,0x24,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x23 */ 0x00,0x00,0x00,0x6C,0x6C,0xFE,0x6C,0x6C,0x6C,0xFE,0x6C,0x6C,0x00,0x00,0x00,0x00,
+-/* 0x24 */ 0x18,0x18,0x7C,0xC6,0xC2,0xC0,0x7C,0x06,0x06,0x86,0xC6,0x7C,0x18,0x18,0x00,0x00,
+-/* 0x25 */ 0x00,0x00,0x00,0x00,0xC2,0xC6,0x0C,0x18,0x30,0x60,0xC6,0x86,0x00,0x00,0x00,0x00,
+-/* 0x26 */ 0x00,0x00,0x38,0x6C,0x6C,0x38,0x76,0xDC,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0x27 */ 0x00,0x30,0x30,0x30,0x60,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x28 */ 0x00,0x00,0x0C,0x18,0x30,0x30,0x30,0x30,0x30,0x30,0x18,0x0C,0x00,0x00,0x00,0x00,
+-/* 0x29 */ 0x00,0x00,0x30,0x18,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x18,0x30,0x00,0x00,0x00,0x00,
+-/* 0x2A */ 0x00,0x00,0x00,0x00,0x00,0x66,0x3C,0xFF,0x3C,0x66,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x2B */ 0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x7E,0x18,0x18,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x2C */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x18,0x30,0x00,0x00,0x00,
+-/* 0x2D */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFE,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x2E */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x00,0x00,0x00,0x00,
+-/* 0x2F */ 0x00,0x00,0x00,0x00,0x02,0x06,0x0C,0x18,0x30,0x60,0xC0,0x80,0x00,0x00,0x00,0x00,
+-/* 0x30 */ 0x00,0x00,0x38,0x6C,0xC6,0xC6,0xD6,0xD6,0xC6,0xC6,0x6C,0x38,0x00,0x00,0x00,0x00,
+-/* 0x31 */ 0x00,0x00,0x18,0x38,0x78,0x18,0x18,0x18,0x18,0x18,0x18,0x7E,0x00,0x00,0x00,0x00,
+-/* 0x32 */ 0x00,0x00,0x7C,0xC6,0x06,0x0C,0x18,0x30,0x60,0xC0,0xC6,0xFE,0x00,0x00,0x00,0x00,
+-/* 0x33 */ 0x00,0x00,0x7C,0xC6,0x06,0x06,0x3C,0x06,0x06,0x06,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x34 */ 0x00,0x00,0x0C,0x1C,0x3C,0x6C,0xCC,0xFE,0x0C,0x0C,0x0C,0x1E,0x00,0x00,0x00,0x00,
+-/* 0x35 */ 0x00,0x00,0xFE,0xC0,0xC0,0xC0,0xFC,0x06,0x06,0x06,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x36 */ 0x00,0x00,0x38,0x60,0xC0,0xC0,0xFC,0xC6,0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x37 */ 0x00,0x00,0xFE,0xC6,0x06,0x06,0x0C,0x18,0x30,0x30,0x30,0x30,0x00,0x00,0x00,0x00,
+-/* 0x38 */ 0x00,0x00,0x7C,0xC6,0xC6,0xC6,0x7C,0xC6,0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x39 */ 0x00,0x00,0x7C,0xC6,0xC6,0xC6,0x7E,0x06,0x06,0x06,0x0C,0x78,0x00,0x00,0x00,0x00,
+-/* 0x3A */ 0x00,0x00,0x00,0x00,0x18,0x18,0x00,0x00,0x00,0x18,0x18,0x00,0x00,0x00,0x00,0x00,
+-/* 0x3B */ 0x00,0x00,0x00,0x00,0x18,0x18,0x00,0x00,0x00,0x18,0x18,0x30,0x00,0x00,0x00,0x00,
+-/* 0x3C */ 0x00,0x00,0x00,0x06,0x0C,0x18,0x30,0x60,0x30,0x18,0x0C,0x06,0x00,0x00,0x00,0x00,
+-/* 0x3D */ 0x00,0x00,0x00,0x00,0x00,0x7E,0x00,0x00,0x7E,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x3E */ 0x00,0x00,0x00,0x60,0x30,0x18,0x0C,0x06,0x0C,0x18,0x30,0x60,0x00,0x00,0x00,0x00,
+-/* 0x3F */ 0x00,0x00,0x7C,0xC6,0xC6,0x0C,0x18,0x18,0x18,0x00,0x18,0x18,0x00,0x00,0x00,0x00,
+-/* 0x40 */ 0x00,0x00,0x00,0x7C,0xC6,0xC6,0xDE,0xDE,0xDE,0xDC,0xC0,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x41 */ 0x00,0x00,0x10,0x38,0x6C,0xC6,0xC6,0xFE,0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00,
+-/* 0x42 */ 0x00,0x00,0xFC,0x66,0x66,0x66,0x7C,0x66,0x66,0x66,0x66,0xFC,0x00,0x00,0x00,0x00,
+-/* 0x43 */ 0x00,0x00,0x3C,0x66,0xC2,0xC0,0xC0,0xC0,0xC0,0xC2,0x66,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x44 */ 0x00,0x00,0xF8,0x6C,0x66,0x66,0x66,0x66,0x66,0x66,0x6C,0xF8,0x00,0x00,0x00,0x00,
+-/* 0x45 */ 0x00,0x00,0xFE,0x66,0x62,0x68,0x78,0x68,0x60,0x62,0x66,0xFE,0x00,0x00,0x00,0x00,
+-/* 0x46 */ 0x00,0x00,0xFE,0x66,0x62,0x68,0x78,0x68,0x60,0x60,0x60,0xF0,0x00,0x00,0x00,0x00,
+-/* 0x47 */ 0x00,0x00,0x3C,0x66,0xC2,0xC0,0xC0,0xDE,0xC6,0xC6,0x66,0x3A,0x00,0x00,0x00,0x00,
+-/* 0x48 */ 0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xFE,0xC6,0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00,
+-/* 0x49 */ 0x00,0x00,0x3C,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x4A */ 0x00,0x00,0x1E,0x0C,0x0C,0x0C,0x0C,0x0C,0xCC,0xCC,0xCC,0x78,0x00,0x00,0x00,0x00,
+-/* 0x4B */ 0x00,0x00,0xE6,0x66,0x66,0x6C,0x78,0x78,0x6C,0x66,0x66,0xE6,0x00,0x00,0x00,0x00,
+-/* 0x4C */ 0x00,0x00,0xF0,0x60,0x60,0x60,0x60,0x60,0x60,0x62,0x66,0xFE,0x00,0x00,0x00,0x00,
+-/* 0x4D */ 0x00,0x00,0xC6,0xEE,0xFE,0xFE,0xD6,0xC6,0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00,
+-/* 0x4E */ 0x00,0x00,0xC6,0xE6,0xF6,0xFE,0xDE,0xCE,0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00,
+-/* 0x4F */ 0x00,0x00,0x7C,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x50 */ 0x00,0x00,0xFC,0x66,0x66,0x66,0x7C,0x60,0x60,0x60,0x60,0xF0,0x00,0x00,0x00,0x00,
+-/* 0x51 */ 0x00,0x00,0x7C,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xD6,0xDE,0x7C,0x0C,0x0E,0x00,0x00,
+-/* 0x52 */ 0x00,0x00,0xFC,0x66,0x66,0x66,0x7C,0x6C,0x66,0x66,0x66,0xE6,0x00,0x00,0x00,0x00,
+-/* 0x53 */ 0x00,0x00,0x7C,0xC6,0xC6,0x60,0x38,0x0C,0x06,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x54 */ 0x00,0x00,0x7E,0x7E,0x5A,0x18,0x18,0x18,0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x55 */ 0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x56 */ 0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0x6C,0x38,0x10,0x00,0x00,0x00,0x00,
+-/* 0x57 */ 0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xD6,0xD6,0xD6,0xFE,0xEE,0x6C,0x00,0x00,0x00,0x00,
+-/* 0x58 */ 0x00,0x00,0xC6,0xC6,0x6C,0x7C,0x38,0x38,0x7C,0x6C,0xC6,0xC6,0x00,0x00,0x00,0x00,
+-/* 0x59 */ 0x00,0x00,0x66,0x66,0x66,0x66,0x3C,0x18,0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x5A */ 0x00,0x00,0xFE,0xC6,0x86,0x0C,0x18,0x30,0x60,0xC2,0xC6,0xFE,0x00,0x00,0x00,0x00,
+-/* 0x5B */ 0x00,0x00,0x3C,0x30,0x30,0x30,0x30,0x30,0x30,0x30,0x30,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x5C */ 0x00,0x00,0x00,0x80,0xC0,0xE0,0x70,0x38,0x1C,0x0E,0x06,0x02,0x00,0x00,0x00,0x00,
+-/* 0x5D */ 0x00,0x00,0x3C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x0C,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x5E */ 0x10,0x38,0x6C,0xC6,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x5F */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFF,0x00,0x00,
+-/* 0x60 */ 0x30,0x30,0x18,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x61 */ 0x00,0x00,0x00,0x00,0x00,0x78,0x0C,0x7C,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0x62 */ 0x00,0x00,0xE0,0x60,0x60,0x78,0x6C,0x66,0x66,0x66,0x66,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x63 */ 0x00,0x00,0x00,0x00,0x00,0x7C,0xC6,0xC0,0xC0,0xC0,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x64 */ 0x00,0x00,0x1C,0x0C,0x0C,0x3C,0x6C,0xCC,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0x65 */ 0x00,0x00,0x00,0x00,0x00,0x7C,0xC6,0xFE,0xC0,0xC0,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x66 */ 0x00,0x00,0x38,0x6C,0x64,0x60,0xF0,0x60,0x60,0x60,0x60,0xF0,0x00,0x00,0x00,0x00,
+-/* 0x67 */ 0x00,0x00,0x00,0x00,0x00,0x3E,0x66,0x66,0x66,0x66,0x66,0x3E,0x06,0x66,0x3C,0x00,
+-/* 0x68 */ 0x00,0x00,0xE0,0x60,0x60,0x6C,0x76,0x66,0x66,0x66,0x66,0xE6,0x00,0x00,0x00,0x00,
+-/* 0x69 */ 0x00,0x00,0x18,0x18,0x00,0x38,0x18,0x18,0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x6A */ 0x00,0x00,0x06,0x06,0x00,0x0E,0x06,0x06,0x06,0x06,0x06,0x06,0x66,0x66,0x3C,0x00,
+-/* 0x6B */ 0x00,0x00,0xE0,0x60,0x60,0x66,0x6C,0x78,0x78,0x6C,0x66,0xE6,0x00,0x00,0x00,0x00,
+-/* 0x6C */ 0x00,0x00,0x38,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x6D */ 0x00,0x00,0x00,0x00,0x00,0x6C,0xFE,0xD6,0xD6,0xD6,0xC6,0xC6,0x00,0x00,0x00,0x00,
+-/* 0x6E */ 0x00,0x00,0x00,0x00,0x00,0xDC,0x66,0x66,0x66,0x66,0x66,0x66,0x00,0x00,0x00,0x00,
+-/* 0x6F */ 0x00,0x00,0x00,0x00,0x00,0x7C,0xC6,0xC6,0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x70 */ 0x00,0x00,0x00,0x00,0x00,0xFC,0x66,0x66,0x66,0x66,0x66,0x7C,0x60,0x60,0xF0,0x00,
+-/* 0x71 */ 0x00,0x00,0x00,0x00,0x00,0x7E,0xCC,0xCC,0xCC,0xCC,0xCC,0x7C,0x0C,0x0C,0x1E,0x00,
+-/* 0x72 */ 0x00,0x00,0x00,0x00,0x00,0xDC,0x76,0x66,0x60,0x60,0x60,0xF0,0x00,0x00,0x00,0x00,
+-/* 0x73 */ 0x00,0x00,0x00,0x00,0x00,0x7C,0xC6,0x60,0x38,0x0C,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x74 */ 0x00,0x00,0x10,0x30,0x30,0xFC,0x30,0x30,0x30,0x30,0x36,0x1C,0x00,0x00,0x00,0x00,
+-/* 0x75 */ 0x00,0x00,0x00,0x00,0x00,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0x76 */ 0x00,0x00,0x00,0x00,0x00,0x66,0x66,0x66,0x66,0x66,0x3C,0x18,0x00,0x00,0x00,0x00,
+-/* 0x77 */ 0x00,0x00,0x00,0x00,0x00,0xC6,0xC6,0xD6,0xD6,0xD6,0xFE,0x6C,0x00,0x00,0x00,0x00,
+-/* 0x78 */ 0x00,0x00,0x00,0x00,0x00,0xC6,0x6C,0x38,0x38,0x38,0x6C,0xC6,0x00,0x00,0x00,0x00,
+-/* 0x79 */ 0x00,0x00,0x00,0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0x7E,0x06,0x0C,0xF8,0x00,
+-/* 0x7A */ 0x00,0x00,0x00,0x00,0x00,0xFE,0xCC,0x18,0x30,0x60,0xC6,0xFE,0x00,0x00,0x00,0x00,
+-/* 0x7B */ 0x00,0x00,0x0E,0x18,0x18,0x18,0x70,0x18,0x18,0x18,0x18,0x0E,0x00,0x00,0x00,0x00,
+-/* 0x7C */ 0x00,0x00,0x18,0x18,0x18,0x18,0x00,0x18,0x18,0x18,0x18,0x18,0x00,0x00,0x00,0x00,
+-/* 0x7D */ 0x00,0x00,0x70,0x18,0x18,0x18,0x0E,0x18,0x18,0x18,0x18,0x70,0x00,0x00,0x00,0x00,
+-/* 0x7E */ 0x00,0x00,0x76,0xDC,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0x7F */ 0x00,0x00,0x00,0x00,0x10,0x38,0x6C,0xC6,0xC6,0xC6,0xFE,0x00,0x00,0x00,0x00,0x00,
+-/* 0x80 */ 0x00,0x00,0x3C,0x66,0xC2,0xC0,0xC0,0xC0,0xC2,0x66,0x3C,0x0C,0x06,0x7C,0x00,0x00,
+-/* 0x81 */ 0x00,0x00,0xCC,0x00,0x00,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0x82 */ 0x00,0x0C,0x18,0x30,0x00,0x7C,0xC6,0xC6,0xFE,0xC0,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x83 */ 0x00,0x10,0x38,0x6C,0x00,0x78,0x0C,0x7C,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0x84 */ 0x00,0x00,0xCC,0x00,0x00,0x78,0x0C,0x7C,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0x85 */ 0x00,0x60,0x30,0x18,0x00,0x78,0x0C,0x7C,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0x86 */ 0x00,0x38,0x6C,0x38,0x00,0x78,0x0C,0x7C,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0x87 */ 0x00,0x00,0x00,0x00,0x3C,0x66,0x60,0x60,0x66,0x3C,0x0C,0x06,0x3C,0x00,0x00,0x00,
+-/* 0x88 */ 0x00,0x10,0x38,0x6C,0x00,0x7C,0xC6,0xC6,0xFE,0xC0,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x89 */ 0x00,0x00,0xC6,0x00,0x00,0x7C,0xC6,0xC6,0xFE,0xC0,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x8A */ 0x00,0x60,0x30,0x18,0x00,0x7C,0xC6,0xC6,0xFE,0xC0,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x8B */ 0x00,0x00,0x66,0x00,0x00,0x38,0x18,0x18,0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x8C */ 0x00,0x18,0x3C,0x66,0x00,0x38,0x18,0x18,0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x8D */ 0x00,0x60,0x30,0x18,0x00,0x38,0x18,0x18,0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00,
+-/* 0x8E */ 0x00,0xC6,0x00,0x10,0x38,0x6C,0xC6,0xC6,0xFE,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00,
+-/* 0x8F */ 0x38,0x6C,0x38,0x00,0x38,0x6C,0xC6,0xC6,0xFE,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00,
+-/* 0x90 */ 0x18,0x30,0x60,0x00,0xFE,0x66,0x60,0x7C,0x60,0x60,0x66,0xFE,0x00,0x00,0x00,0x00,
+-/* 0x91 */ 0x00,0x00,0x00,0x00,0x00,0xCC,0x76,0x36,0x7E,0xD8,0xD8,0x6E,0x00,0x00,0x00,0x00,
+-/* 0x92 */ 0x00,0x00,0x3E,0x6C,0xCC,0xCC,0xFE,0xCC,0xCC,0xCC,0xCC,0xCE,0x00,0x00,0x00,0x00,
+-/* 0x93 */ 0x00,0x10,0x38,0x6C,0x00,0x7C,0xC6,0xC6,0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x94 */ 0x00,0x00,0xC6,0x00,0x00,0x7C,0xC6,0xC6,0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x95 */ 0x00,0x60,0x30,0x18,0x00,0x7C,0xC6,0xC6,0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x96 */ 0x00,0x30,0x78,0xCC,0x00,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0x97 */ 0x00,0x60,0x30,0x18,0x00,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0x98 */ 0x00,0x00,0xC6,0x00,0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0x7E,0x06,0x0C,0x78,0x00,
+-/* 0x99 */ 0x00,0xC6,0x00,0x7C,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x9A */ 0x00,0xC6,0x00,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0x9B */ 0x00,0x18,0x18,0x3C,0x66,0x60,0x60,0x60,0x66,0x3C,0x18,0x18,0x00,0x00,0x00,0x00,
+-/* 0x9C */ 0x00,0x38,0x6C,0x64,0x60,0xF8,0x60,0x60,0x60,0x60,0xE6,0xFC,0x00,0x00,0x00,0x00,
+-/* 0x9D */ 0x00,0x00,0x66,0x66,0x3C,0x18,0x7E,0x18,0x7E,0x18,0x18,0x18,0x00,0x00,0x00,0x00,
+-/* 0x9E */ 0x00,0xF8,0xCC,0xCC,0xF8,0xC4,0xCC,0xDE,0xCC,0xCC,0xCC,0xC6,0x00,0x00,0x00,0x00,
+-/* 0x9F */ 0x00,0x0E,0x1B,0x18,0x18,0x18,0x7E,0x18,0x18,0x18,0x18,0x18,0xD8,0x70,0x00,0x00,
+-/* 0xA0 */ 0x00,0x18,0x30,0x60,0x00,0x78,0x0C,0x7C,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0xA1 */ 0x00,0x0C,0x18,0x30,0x00,0x38,0x18,0x18,0x18,0x18,0x18,0x3C,0x00,0x00,0x00,0x00,
+-/* 0xA2 */ 0x00,0x18,0x30,0x60,0x00,0x7C,0xC6,0xC6,0xC6,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0xA3 */ 0x00,0x18,0x30,0x60,0x00,0xCC,0xCC,0xCC,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00,
+-/* 0xA4 */ 0x00,0x00,0x76,0xDC,0x00,0xDC,0x66,0x66,0x66,0x66,0x66,0x66,0x00,0x00,0x00,0x00,
+-/* 0xA5 */ 0x76,0xDC,0x00,0xC6,0xE6,0xF6,0xFE,0xDE,0xCE,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00,
+-/* 0xA6 */ 0x00,0x3C,0x6C,0x6C,0x3E,0x00,0x7E,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xA7 */ 0x00,0x38,0x6C,0x6C,0x38,0x00,0x7C,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xA8 */ 0x00,0x00,0x30,0x30,0x00,0x30,0x30,0x60,0xC0,0xC6,0xC6,0x7C,0x00,0x00,0x00,0x00,
+-/* 0xA9 */ 0x00,0x00,0x00,0x00,0x00,0x00,0xFE,0xC0,0xC0,0xC0,0xC0,0x00,0x00,0x00,0x00,0x00,
+-/* 0xAA */ 0x00,0x00,0x00,0x00,0x00,0x00,0xFE,0x06,0x06,0x06,0x06,0x00,0x00,0x00,0x00,0x00,
+-/* 0xAB */ 0x00,0xC0,0xC0,0xC2,0xC6,0xCC,0x18,0x30,0x60,0xDC,0x86,0x0C,0x18,0x3E,0x00,0x00,
+-/* 0xAC */ 0x00,0xC0,0xC0,0xC2,0xC6,0xCC,0x18,0x30,0x66,0xCE,0x9E,0x3E,0x06,0x06,0x00,0x00,
+-/* 0xAD */ 0x00,0x00,0x18,0x18,0x00,0x18,0x18,0x18,0x3C,0x3C,0x3C,0x18,0x00,0x00,0x00,0x00,
+-/* 0xAE */ 0x00,0x00,0x00,0x00,0x00,0x36,0x6C,0xD8,0x6C,0x36,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xAF */ 0x00,0x00,0x00,0x00,0x00,0xD8,0x6C,0x36,0x6C,0xD8,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xB0 */ 0x11,0x44,0x11,0x44,0x11,0x44,0x11,0x44,0x11,0x44,0x11,0x44,0x11,0x44,0x11,0x44,
+-/* 0xB1 */ 0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,
+-/* 0xB2 */ 0xDD,0x77,0xDD,0x77,0xDD,0x77,0xDD,0x77,0xDD,0x77,0xDD,0x77,0xDD,0x77,0xDD,0x77,
+-/* 0xB3 */ 0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xB4 */ 0x18,0x18,0x18,0x18,0x18,0x18,0x18,0xF8,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xB5 */ 0x18,0x18,0x18,0x18,0x18,0xF8,0x18,0xF8,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xB6 */ 0x36,0x36,0x36,0x36,0x36,0x36,0x36,0xF6,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xB7 */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFE,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xB8 */ 0x00,0x00,0x00,0x00,0x00,0xF8,0x18,0xF8,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xB9 */ 0x36,0x36,0x36,0x36,0x36,0xF6,0x06,0xF6,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xBA */ 0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xBB */ 0x00,0x00,0x00,0x00,0x00,0xFE,0x06,0xF6,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xBC */ 0x36,0x36,0x36,0x36,0x36,0xF6,0x06,0xFE,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xBD */ 0x36,0x36,0x36,0x36,0x36,0x36,0x36,0xFE,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xBE */ 0x18,0x18,0x18,0x18,0x18,0xF8,0x18,0xF8,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xBF */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xF8,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xC0 */ 0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x1F,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xC1 */ 0x18,0x18,0x18,0x18,0x18,0x18,0x18,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xC2 */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFF,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xC3 */ 0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x1F,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xC4 */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xC5 */ 0x18,0x18,0x18,0x18,0x18,0x18,0x18,0xFF,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xC6 */ 0x18,0x18,0x18,0x18,0x18,0x1F,0x18,0x1F,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xC7 */ 0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x37,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xC8 */ 0x36,0x36,0x36,0x36,0x36,0x37,0x30,0x3F,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xC9 */ 0x00,0x00,0x00,0x00,0x00,0x3F,0x30,0x37,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xCA */ 0x36,0x36,0x36,0x36,0x36,0xF7,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xCB */ 0x00,0x00,0x00,0x00,0x00,0xFF,0x00,0xF7,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xCC */ 0x36,0x36,0x36,0x36,0x36,0x37,0x30,0x37,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xCD */ 0x00,0x00,0x00,0x00,0x00,0xFF,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xCE */ 0x36,0x36,0x36,0x36,0x36,0xF7,0x00,0xF7,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xCF */ 0x18,0x18,0x18,0x18,0x18,0xFF,0x00,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xD0 */ 0x36,0x36,0x36,0x36,0x36,0x36,0x36,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xD1 */ 0x00,0x00,0x00,0x00,0x00,0xFF,0x00,0xFF,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xD2 */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFF,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xD3 */ 0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x3F,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xD4 */ 0x18,0x18,0x18,0x18,0x18,0x1F,0x18,0x1F,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xD5 */ 0x00,0x00,0x00,0x00,0x00,0x1F,0x18,0x1F,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xD6 */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x3F,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xD7 */ 0x36,0x36,0x36,0x36,0x36,0x36,0x36,0xFF,0x36,0x36,0x36,0x36,0x36,0x36,0x36,0x36,
+-/* 0xD8 */ 0x18,0x18,0x18,0x18,0x18,0xFF,0x18,0xFF,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xD9 */ 0x18,0x18,0x18,0x18,0x18,0x18,0x18,0xF8,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xDA */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x1F,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xDB */ 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+-/* 0xDC */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+-/* 0xDD */ 0xF0,0xF0,0xF0,0xF0,0xF0,0xF0,0xF0,0xF0,0xF0,0xF0,0xF0,0xF0,0xF0,0xF0,0xF0,0xF0,
+-/* 0xDE */ 0x0F,0x0F,0x0F,0x0F,0x0F,0x0F,0x0F,0x0F,0x0F,0x0F,0x0F,0x0F,0x0F,0x0F,0x0F,0x0F,
+-/* 0xDF */ 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xE0 */ 0x00,0x00,0x00,0x00,0x00,0x76,0xDC,0xD8,0xD8,0xD8,0xDC,0x76,0x00,0x00,0x00,0x00,
+-/* 0xE1 */ 0x00,0x00,0x7C,0xC6,0xC6,0xC6,0xFC,0xC6,0xC6,0xC6,0xC6,0xDC,0xC0,0xC0,0x00,0x00,
+-/* 0xE2 */ 0x00,0x00,0xFE,0xC6,0xC6,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0xC0,0x00,0x00,0x00,0x00,
+-/* 0xE3 */ 0x00,0x00,0x00,0x00,0x00,0xFE,0x6C,0x6C,0x6C,0x6C,0x6C,0x6C,0x00,0x00,0x00,0x00,
+-/* 0xE4 */ 0x00,0x00,0xFE,0xC6,0x60,0x30,0x18,0x18,0x30,0x60,0xC6,0xFE,0x00,0x00,0x00,0x00,
+-/* 0xE5 */ 0x00,0x00,0x00,0x00,0x00,0x7E,0xD8,0xD8,0xD8,0xD8,0xD8,0x70,0x00,0x00,0x00,0x00,
+-/* 0xE6 */ 0x00,0x00,0x00,0x00,0x00,0x66,0x66,0x66,0x66,0x66,0x7C,0x60,0xC0,0x00,0x00,0x00,
+-/* 0xE7 */ 0x00,0x00,0x00,0x00,0x00,0x76,0xDC,0x18,0x18,0x18,0x18,0x18,0x00,0x00,0x00,0x00,
+-/* 0xE8 */ 0x00,0x00,0x7E,0x18,0x3C,0x66,0x66,0x66,0x66,0x3C,0x18,0x7E,0x00,0x00,0x00,0x00,
+-/* 0xE9 */ 0x00,0x00,0x38,0x6C,0xC6,0xC6,0xFE,0xC6,0xC6,0xC6,0x6C,0x38,0x00,0x00,0x00,0x00,
+-/* 0xEA */ 0x00,0x00,0x38,0x6C,0xC6,0xC6,0xC6,0x6C,0x6C,0x6C,0x6C,0xEE,0x00,0x00,0x00,0x00,
+-/* 0xEB */ 0x00,0x00,0x1E,0x30,0x18,0x0C,0x3E,0x66,0x66,0x66,0x66,0x3C,0x00,0x00,0x00,0x00,
+-/* 0xEC */ 0x00,0x00,0x00,0x00,0x00,0x7E,0xDB,0xDB,0xDB,0x7E,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xED */ 0x00,0x00,0x00,0x03,0x06,0x7E,0xDB,0xDB,0xF3,0x7E,0x60,0xC0,0x00,0x00,0x00,0x00,
+-/* 0xEE */ 0x00,0x00,0x1C,0x30,0x60,0x60,0x7C,0x60,0x60,0x60,0x30,0x1C,0x00,0x00,0x00,0x00,
+-/* 0xEF */ 0x00,0x00,0x7C,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00,
+-/* 0xF0 */ 0x00,0x00,0x00,0x00,0xFE,0x00,0x00,0xFE,0x00,0x00,0xFE,0x00,0x00,0x00,0x00,0x00,
+-/* 0xF1 */ 0x00,0x00,0x00,0x00,0x18,0x18,0x7E,0x18,0x18,0x00,0x00,0xFF,0x00,0x00,0x00,0x00,
+-/* 0xF2 */ 0x00,0x00,0x00,0x30,0x18,0x0C,0x06,0x0C,0x18,0x30,0x00,0x7E,0x00,0x00,0x00,0x00,
+-/* 0xF3 */ 0x00,0x00,0x00,0x0C,0x18,0x30,0x60,0x30,0x18,0x0C,0x00,0x7E,0x00,0x00,0x00,0x00,
+-/* 0xF4 */ 0x00,0x0E,0x1B,0x1B,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,
+-/* 0xF5 */ 0x18,0x18,0x18,0x18,0x18,0x18,0x18,0x18,0xD8,0xD8,0xD8,0x70,0x00,0x00,0x00,0x00,
+-/* 0xF6 */ 0x00,0x00,0x00,0x00,0x18,0x18,0x00,0x7E,0x00,0x18,0x18,0x00,0x00,0x00,0x00,0x00,
+-/* 0xF7 */ 0x00,0x00,0x00,0x00,0x00,0x76,0xDC,0x00,0x76,0xDC,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xF8 */ 0x00,0x38,0x6C,0x6C,0x38,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xF9 */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xFA */ 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x18,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xFB */ 0x00,0x0F,0x0C,0x0C,0x0C,0x0C,0x0C,0xEC,0x6C,0x6C,0x3C,0x1C,0x00,0x00,0x00,0x00,
+-/* 0xFC */ 0x00,0xD8,0x6C,0x6C,0x6C,0x6C,0x6C,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xFD */ 0x00,0x70,0xD8,0x30,0x60,0xC8,0xF8,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+-/* 0xFE */ 0x00,0x00,0x00,0x00,0x7C,0x7C,0x7C,0x7C,0x7C,0x7C,0x7C,0x00,0x00,0x00,0x00,0x00,
+-};
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/mpc10x.h linux-2.6.22.19-cs543/arch/ppc/boot/include/mpc10x.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/mpc10x.h	2013-01-18 17:21:40.516008921 -0500
++++ linux-2.6.22.19-cs543/arch/ppc/boot/include/mpc10x.h	1969-12-31 19:00:00.000000000 -0500
+@@ -1,63 +0,0 @@
+-/*
+- * Common defines for the Motorola SPS MPC106/8240/107 Host bridge/Mem
+- * ctrl/EPIC/etc.
+- *
+- * Author: Tom Rini <trini@mvista.com>
+- *
+- * This is a heavily stripped down version of:
+- * include/asm-ppc/mpc10x.h
+- *
+- * Author: Mark A. Greer
+- *         mgreer@mvista.com
+- *
+- * 2001-2002 (c) MontaVista, Software, Inc.  This file is licensed under
+- * the terms of the GNU General Public License version 2.  This program
+- * is licensed "as is" without any warranty of any kind, whether express
+- * or implied.
+- */
+-#ifndef __BOOT_MPC10X_H__
+-#define __BOOT_MPC10X_H__
+-
+-/*
+- * The values here don't completely map everything but should work in most
+- * cases.
+- *
+- * MAP A (PReP Map)
+- *   Processor: 0x80000000 - 0x807fffff -> PCI I/O: 0x00000000 - 0x007fffff
+- *   Processor: 0xc0000000 - 0xdfffffff -> PCI MEM: 0x00000000 - 0x1fffffff
+- *   PCI MEM:   0x80000000 -> Processor System Memory: 0x00000000
+- *   EUMB mapped to: ioremap_base - 0x00100000 (ioremap_base - 1 MB)
+- *
+- * MAP B (CHRP Map)
+- *   Processor: 0xfe000000 - 0xfebfffff -> PCI I/O: 0x00000000 - 0x00bfffff
+- *   Processor: 0x80000000 - 0xbfffffff -> PCI MEM: 0x80000000 - 0xbfffffff
+- *   PCI MEM:   0x00000000 -> Processor System Memory: 0x00000000
+- *   EUMB mapped to: ioremap_base - 0x00100000 (ioremap_base - 1 MB)
+- */
+-
+-/* Define the type of map to use */
+-#define	MPC10X_MEM_MAP_A		1
+-#define	MPC10X_MEM_MAP_B		2
+-
+-/* Map A (PReP Map) Defines */
+-#define	MPC10X_MAPA_CNFG_ADDR		0x80000cf8
+-#define	MPC10X_MAPA_CNFG_DATA		0x80000cfc
+-
+-/* Map B (CHRP Map) Defines */
+-#define	MPC10X_MAPB_CNFG_ADDR		0xfec00000
+-#define	MPC10X_MAPB_CNFG_DATA		0xfee00000
+-
+-/* Define offsets for the memory controller registers in the config space */
+-#define MPC10X_MCTLR_MEM_START_1	0x80	/* Banks 0-3 */
+-#define MPC10X_MCTLR_MEM_START_2	0x84	/* Banks 4-7 */
+-#define MPC10X_MCTLR_EXT_MEM_START_1	0x88	/* Banks 0-3 */
+-#define MPC10X_MCTLR_EXT_MEM_START_2	0x8c	/* Banks 4-7 */
+-
+-#define MPC10X_MCTLR_MEM_END_1		0x90	/* Banks 0-3 */
+-#define MPC10X_MCTLR_MEM_END_2		0x94	/* Banks 4-7 */
+-#define MPC10X_MCTLR_EXT_MEM_END_1	0x98	/* Banks 0-3 */
+-#define MPC10X_MCTLR_EXT_MEM_END_2	0x9c	/* Banks 4-7 */
+-
+-#define MPC10X_MCTLR_MEM_BANK_ENABLES	0xa0
+-
+-#endif	/* __BOOT_MPC10X_H__ */
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/mpsc_defs.h linux-2.6.22.19-cs543/arch/ppc/boot/include/mpsc_defs.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/mpsc_defs.h	2013-01-18 17:21:40.556000409 -0500
++++ linux-2.6.22.19-cs543/arch/ppc/boot/include/mpsc_defs.h	1969-12-31 19:00:00.000000000 -0500
+@@ -1,146 +0,0 @@
+-/*
+- * arch/ppc/boot/include/mpsc_defs.h
+- *
+- * Register definitions for the Marvell Multi-Protocol Serial Controller (MPSC),
+- * Serial DMA Controller (SDMA), and Baud Rate Generator (BRG).
+- *
+- * Author: Mark A. Greer <mgreer@mvista.com>
+- *
+- * 2004 (c) MontaVista, Software, Inc.  This file is licensed under
+- * the terms of the GNU General Public License version 2.  This program
+- * is licensed "as is" without any warranty of any kind, whether express
+- * or implied.
+- */
+-#ifndef	_PPC_BOOT_MPSC_DEFS_H__
+-#define	_PPC_BOOT_MPSC_DEFS_H__
+-
+-#define	MPSC_NUM_CTLRS		2
+-
+-/*
+- *****************************************************************************
+- *
+- *	Multi-Protocol Serial Controller Interface Registers
+- *
+- *****************************************************************************
+- */
+-
+-/* Main Configuratino Register Offsets */
+-#define	MPSC_MMCRL			0x0000
+-#define	MPSC_MMCRH			0x0004
+-#define	MPSC_MPCR			0x0008
+-#define	MPSC_CHR_1			0x000c
+-#define	MPSC_CHR_2			0x0010
+-#define	MPSC_CHR_3			0x0014
+-#define	MPSC_CHR_4			0x0018
+-#define	MPSC_CHR_5			0x001c
+-#define	MPSC_CHR_6			0x0020
+-#define	MPSC_CHR_7			0x0024
+-#define	MPSC_CHR_8			0x0028
+-#define	MPSC_CHR_9			0x002c
+-#define	MPSC_CHR_10			0x0030
+-#define	MPSC_CHR_11			0x0034
+-
+-#define	MPSC_MPCR_CL_5			0
+-#define	MPSC_MPCR_CL_6			1
+-#define	MPSC_MPCR_CL_7			2
+-#define	MPSC_MPCR_CL_8			3
+-#define	MPSC_MPCR_SBL_1			0
+-#define	MPSC_MPCR_SBL_2			3
+-
+-#define	MPSC_CHR_2_TEV			(1<<1)
+-#define	MPSC_CHR_2_TA			(1<<7)
+-#define	MPSC_CHR_2_TTCS			(1<<9)
+-#define	MPSC_CHR_2_REV			(1<<17)
+-#define	MPSC_CHR_2_RA			(1<<23)
+-#define	MPSC_CHR_2_CRD			(1<<25)
+-#define	MPSC_CHR_2_EH			(1<<31)
+-#define	MPSC_CHR_2_PAR_ODD		0
+-#define	MPSC_CHR_2_PAR_SPACE		1
+-#define	MPSC_CHR_2_PAR_EVEN		2
+-#define	MPSC_CHR_2_PAR_MARK		3
+-
+-/* MPSC Signal Routing */
+-#define	MPSC_MRR			0x0000
+-#define	MPSC_RCRR			0x0004
+-#define	MPSC_TCRR			0x0008
+-
+-/*
+- *****************************************************************************
+- *
+- *	Serial DMA Controller Interface Registers
+- *
+- *****************************************************************************
+- */
+-
+-#define	SDMA_SDC			0x0000
+-#define	SDMA_SDCM			0x0008
+-#define	SDMA_RX_DESC			0x0800
+-#define	SDMA_RX_BUF_PTR			0x0808
+-#define	SDMA_SCRDP			0x0810
+-#define	SDMA_TX_DESC			0x0c00
+-#define	SDMA_SCTDP			0x0c10
+-#define	SDMA_SFTDP			0x0c14
+-
+-#define	SDMA_DESC_CMDSTAT_PE		(1<<0)
+-#define	SDMA_DESC_CMDSTAT_CDL		(1<<1)
+-#define	SDMA_DESC_CMDSTAT_FR		(1<<3)
+-#define	SDMA_DESC_CMDSTAT_OR		(1<<6)
+-#define	SDMA_DESC_CMDSTAT_BR		(1<<9)
+-#define	SDMA_DESC_CMDSTAT_MI		(1<<10)
+-#define	SDMA_DESC_CMDSTAT_A		(1<<11)
+-#define	SDMA_DESC_CMDSTAT_AM		(1<<12)
+-#define	SDMA_DESC_CMDSTAT_CT		(1<<13)
+-#define	SDMA_DESC_CMDSTAT_C		(1<<14)
+-#define	SDMA_DESC_CMDSTAT_ES		(1<<15)
+-#define	SDMA_DESC_CMDSTAT_L		(1<<16)
+-#define	SDMA_DESC_CMDSTAT_F		(1<<17)
+-#define	SDMA_DESC_CMDSTAT_P		(1<<18)
+-#define	SDMA_DESC_CMDSTAT_EI		(1<<23)
+-#define	SDMA_DESC_CMDSTAT_O		(1<<31)
+-
+-#define SDMA_DESC_DFLT			(SDMA_DESC_CMDSTAT_O |	\
+-					SDMA_DESC_CMDSTAT_EI)
+-
+-#define	SDMA_SDC_RFT			(1<<0)
+-#define	SDMA_SDC_SFM			(1<<1)
+-#define	SDMA_SDC_BLMR			(1<<6)
+-#define	SDMA_SDC_BLMT			(1<<7)
+-#define	SDMA_SDC_POVR			(1<<8)
+-#define	SDMA_SDC_RIFB			(1<<9)
+-
+-#define	SDMA_SDCM_ERD			(1<<7)
+-#define	SDMA_SDCM_AR			(1<<15)
+-#define	SDMA_SDCM_STD			(1<<16)
+-#define	SDMA_SDCM_TXD			(1<<23)
+-#define	SDMA_SDCM_AT			(1<<31)
+-
+-#define	SDMA_0_CAUSE_RXBUF		(1<<0)
+-#define	SDMA_0_CAUSE_RXERR		(1<<1)
+-#define	SDMA_0_CAUSE_TXBUF		(1<<2)
+-#define	SDMA_0_CAUSE_TXEND		(1<<3)
+-#define	SDMA_1_CAUSE_RXBUF		(1<<8)
+-#define	SDMA_1_CAUSE_RXERR		(1<<9)
+-#define	SDMA_1_CAUSE_TXBUF		(1<<10)
+-#define	SDMA_1_CAUSE_TXEND		(1<<11)
+-
+-#define	SDMA_CAUSE_RX_MASK	(SDMA_0_CAUSE_RXBUF | SDMA_0_CAUSE_RXERR | \
+-	SDMA_1_CAUSE_RXBUF | SDMA_1_CAUSE_RXERR)
+-#define	SDMA_CAUSE_TX_MASK	(SDMA_0_CAUSE_TXBUF | SDMA_0_CAUSE_TXEND | \
+-	SDMA_1_CAUSE_TXBUF | SDMA_1_CAUSE_TXEND)
+-
+-/* SDMA Interrupt registers */
+-#define	SDMA_INTR_CAUSE			0x0000
+-#define	SDMA_INTR_MASK			0x0080
+-
+-/*
+- *****************************************************************************
+- *
+- *	Baud Rate Generator Interface Registers
+- *
+- *****************************************************************************
+- */
+-
+-#define	BRG_BCR				0x0000
+-#define	BRG_BTR				0x0004
+-
+-#endif /*_PPC_BOOT_MPSC_DEFS_H__ */
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/nonstdio.h linux-2.6.22.19-cs543/arch/ppc/boot/include/nonstdio.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/nonstdio.h	2013-01-18 17:21:40.585994025 -0500
++++ linux-2.6.22.19-cs543/arch/ppc/boot/include/nonstdio.h	1969-12-31 19:00:00.000000000 -0500
+@@ -1,34 +0,0 @@
+-/*
+- * Copyright (C) Paul Mackerras 1997.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License
+- * as published by the Free Software Foundation; either version
+- * 2 of the License, or (at your option) any later version.
+- *
+- * This is sort of a catchall for I/O related functions.  Stuff that
+- * wouldn't be in 'stdio.h' normally is here, and it's 'nonstdio.h'
+- * for a reason.  -- Tom
+- */
+-typedef int FILE;
+-extern FILE *stdin, *stdout;
+-#define NULL ((void *)0)
+-#define EOF (-1)
+-#define fopen(n, m) NULL
+-#define fflush(f) 0
+-#define fclose(f) 0
+-#define perror(s) printf("%s: no files!\n", (s))
+-
+-extern int getc(void);
+-extern int printf(const char *format, ...);
+-extern int sprintf(char *str, const char *format, ...);
+-extern int tstc(void);
+-extern void exit(void);
+-extern void outb(int port, unsigned char val);
+-extern void putc(const char c);
+-extern void puthex(unsigned long val);
+-extern void puts(const char *);
+-extern void udelay(long delay);
+-extern unsigned char inb(int port);
+-extern void board_isa_init(void);
+-extern void ISA_init(unsigned long base);
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/of1275.h linux-2.6.22.19-cs543/arch/ppc/boot/include/of1275.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/of1275.h	2013-01-18 17:21:40.635983385 -0500
++++ linux-2.6.22.19-cs543/arch/ppc/boot/include/of1275.h	1969-12-31 19:00:00.000000000 -0500
+@@ -1,42 +0,0 @@
+-/*
+- * Copyright (C) Paul Mackerras 1997.
+- * Copyright (C) Leigh Brown 2002.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License
+- * as published by the Free Software Foundation; either version
+- * 2 of the License, or (at your option) any later version.
+- */
+-
+-typedef void *prom_handle;
+-typedef void *ihandle;
+-typedef void *phandle;
+-typedef int (*prom_entry)(void *);
+-
+-#define OF_INVALID_HANDLE	((prom_handle)-1UL)
+-
+-extern prom_entry of_prom_entry;
+-
+-/* function declarations */
+-
+-int	call_prom(const char *service, int nargs, int nret, ...);
+-int	call_prom_ret(const char *service, int nargs, int nret,
+-		      unsigned int *rets, ...);
+-void *	claim(unsigned int virt, unsigned int size, unsigned int align);
+-int	map(unsigned int phys, unsigned int virt, unsigned int size);
+-void	enter(void);
+-void	exit(void);
+-phandle	finddevice(const char *name);
+-int	getprop(phandle node, const char *name, void *buf, int buflen);
+-void	ofinit(prom_entry entry);
+-int	ofstdio(ihandle *stdin, ihandle *stdout, ihandle *stderr);
+-int	read(ihandle instance, void *buf, int buflen);
+-void	release(void *virt, unsigned int size);
+-int	write(ihandle instance, void *buf, int buflen);
+-
+-/* inlines */
+-
+-extern inline void pause(void)
+-{
+-	enter();
+-}
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/rs6000.h linux-2.6.22.19-cs543/arch/ppc/boot/include/rs6000.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/rs6000.h	2013-01-18 17:21:40.715966367 -0500
++++ linux-2.6.22.19-cs543/arch/ppc/boot/include/rs6000.h	1969-12-31 19:00:00.000000000 -0500
+@@ -1,243 +0,0 @@
+-/* IBM RS/6000 "XCOFF" file definitions for BFD.
+-   Copyright (C) 1990, 1991 Free Software Foundation, Inc.
+-   FIXME: Can someone provide a transliteration of this name into ASCII?
+-   Using the following chars caused a compiler warning on HIUX (so I replaced
+-   them with octal escapes), and isn't useful without an understanding of what
+-   character set it is.
+-   Written by Mimi Ph\373\364ng-Th\345o V\365 of IBM
+-   and John Gilmore of Cygnus Support.  */
+-
+-/********************** FILE HEADER **********************/
+-
+-struct external_filehdr {
+-	char f_magic[2];	/* magic number			*/
+-	char f_nscns[2];	/* number of sections		*/
+-	char f_timdat[4];	/* time & date stamp		*/
+-	char f_symptr[4];	/* file pointer to symtab	*/
+-	char f_nsyms[4];	/* number of symtab entries	*/
+-	char f_opthdr[2];	/* sizeof(optional hdr)		*/
+-	char f_flags[2];	/* flags			*/
+-};
+-
+-        /* IBM RS/6000 */
+-#define U802WRMAGIC     0730    /* writeable text segments **chh**      */
+-#define U802ROMAGIC     0735    /* readonly sharable text segments      */
+-#define U802TOCMAGIC    0737    /* readonly text segments and TOC       */
+-
+-#define BADMAG(x)	\
+-	((x).f_magic != U802ROMAGIC && (x).f_magic != U802WRMAGIC && \
+-	 (x).f_magic != U802TOCMAGIC)
+-
+-#define	FILHDR	struct external_filehdr
+-#define	FILHSZ	20
+-
+-
+-/********************** AOUT "OPTIONAL HEADER" **********************/
+-
+-
+-typedef struct
+-{
+-  unsigned char	magic[2];	/* type of file			*/
+-  unsigned char	vstamp[2];	/* version stamp		*/
+-  unsigned char	tsize[4];	/* text size in bytes, padded to FW bdry */
+-  unsigned char	dsize[4];	/* initialized data "  "	*/
+-  unsigned char	bsize[4];	/* uninitialized data "   "	*/
+-  unsigned char	entry[4];	/* entry pt.			*/
+-  unsigned char	text_start[4];	/* base of text used for this file */
+-  unsigned char	data_start[4];	/* base of data used for this file */
+-  unsigned char	o_toc[4];	/* address of TOC */
+-  unsigned char	o_snentry[2];	/* section number of entry point */
+-  unsigned char	o_sntext[2];	/* section number of .text section */
+-  unsigned char	o_sndata[2];	/* section number of .data section */
+-  unsigned char	o_sntoc[2];	/* section number of TOC */
+-  unsigned char	o_snloader[2];	/* section number of .loader section */
+-  unsigned char	o_snbss[2];	/* section number of .bss section */
+-  unsigned char	o_algntext[2];	/* .text alignment */
+-  unsigned char	o_algndata[2];	/* .data alignment */
+-  unsigned char	o_modtype[2];	/* module type (??) */
+-  unsigned char o_cputype[2];	/* cpu type */
+-  unsigned char	o_maxstack[4];	/* max stack size (??) */
+-  unsigned char o_maxdata[4];	/* max data size (??) */
+-  unsigned char	o_resv2[12];	/* reserved */
+-}
+-AOUTHDR;
+-
+-#define AOUTSZ 72
+-#define SMALL_AOUTSZ (28)
+-#define AOUTHDRSZ 72
+-
+-#define	RS6K_AOUTHDR_OMAGIC	0x0107	/* old: text & data writeable */
+-#define	RS6K_AOUTHDR_NMAGIC	0x0108	/* new: text r/o, data r/w */
+-#define	RS6K_AOUTHDR_ZMAGIC	0x010B	/* paged: text r/o, both page-aligned */
+-
+-
+-/********************** SECTION HEADER **********************/
+-
+-
+-struct external_scnhdr {
+-	char		s_name[8];	/* section name			*/
+-	char		s_paddr[4];	/* physical address, aliased s_nlib */
+-	char		s_vaddr[4];	/* virtual address		*/
+-	char		s_size[4];	/* section size			*/
+-	char		s_scnptr[4];	/* file ptr to raw data for section */
+-	char		s_relptr[4];	/* file ptr to relocation	*/
+-	char		s_lnnoptr[4];	/* file ptr to line numbers	*/
+-	char		s_nreloc[2];	/* number of relocation entries	*/
+-	char		s_nlnno[2];	/* number of line number entries*/
+-	char		s_flags[4];	/* flags			*/
+-};
+-
+-/*
+- * names of "special" sections
+- */
+-#define _TEXT	".text"
+-#define _DATA	".data"
+-#define _BSS	".bss"
+-#define _PAD	".pad"
+-#define _LOADER	".loader"
+-
+-#define	SCNHDR	struct external_scnhdr
+-#define	SCNHSZ	40
+-
+-/* XCOFF uses a special .loader section with type STYP_LOADER.  */
+-#define STYP_LOADER 0x1000
+-
+-/* XCOFF uses a special .debug section with type STYP_DEBUG.  */
+-#define STYP_DEBUG 0x2000
+-
+-/* XCOFF handles line number or relocation overflow by creating
+-   another section header with STYP_OVRFLO set.  */
+-#define STYP_OVRFLO 0x8000
+-
+-/********************** LINE NUMBERS **********************/
+-
+-/* 1 line number entry for every "breakpointable" source line in a section.
+- * Line numbers are grouped on a per function basis; first entry in a function
+- * grouping will have l_lnno = 0 and in place of physical address will be the
+- * symbol table index of the function name.
+- */
+-struct external_lineno {
+-	union {
+-		char l_symndx[4];	/* function name symbol index, iff l_lnno == 0*/
+-		char l_paddr[4];	/* (physical) address of line number	*/
+-	} l_addr;
+-	char l_lnno[2];	/* line number		*/
+-};
+-
+-
+-#define	LINENO	struct external_lineno
+-#define	LINESZ	6
+-
+-
+-/********************** SYMBOLS **********************/
+-
+-#define E_SYMNMLEN	8	/* # characters in a symbol name	*/
+-#define E_FILNMLEN	14	/* # characters in a file name		*/
+-#define E_DIMNUM	4	/* # array dimensions in auxiliary entry */
+-
+-struct external_syment
+-{
+-  union {
+-    char e_name[E_SYMNMLEN];
+-    struct {
+-      char e_zeroes[4];
+-      char e_offset[4];
+-    } e;
+-  } e;
+-  char e_value[4];
+-  char e_scnum[2];
+-  char e_type[2];
+-  char e_sclass[1];
+-  char e_numaux[1];
+-};
+-
+-
+-
+-#define N_BTMASK	(017)
+-#define N_TMASK		(060)
+-#define N_BTSHFT	(4)
+-#define N_TSHIFT	(2)
+-
+-
+-union external_auxent {
+-	struct {
+-		char x_tagndx[4];	/* str, un, or enum tag indx */
+-		union {
+-			struct {
+-			    char  x_lnno[2]; /* declaration line number */
+-			    char  x_size[2]; /* str/union/array size */
+-			} x_lnsz;
+-			char x_fsize[4];	/* size of function */
+-		} x_misc;
+-		union {
+-			struct {		/* if ISFCN, tag, or .bb */
+-			    char x_lnnoptr[4];	/* ptr to fcn line # */
+-			    char x_endndx[4];	/* entry ndx past block end */
+-			} x_fcn;
+-			struct {		/* if ISARY, up to 4 dimen. */
+-			    char x_dimen[E_DIMNUM][2];
+-			} x_ary;
+-		} x_fcnary;
+-		char x_tvndx[2];		/* tv index */
+-	} x_sym;
+-
+-	union {
+-		char x_fname[E_FILNMLEN];
+-		struct {
+-			char x_zeroes[4];
+-			char x_offset[4];
+-		} x_n;
+-	} x_file;
+-
+-	struct {
+-		char x_scnlen[4];			/* section length */
+-		char x_nreloc[2];	/* # relocation entries */
+-		char x_nlinno[2];	/* # line numbers */
+-	} x_scn;
+-
+-        struct {
+-		char x_tvfill[4];	/* tv fill value */
+-		char x_tvlen[2];	/* length of .tv */
+-		char x_tvran[2][2];	/* tv range */
+-	} x_tv;		/* info about .tv section (in auxent of symbol .tv)) */
+-
+-	struct {
+-		unsigned char x_scnlen[4];
+-		unsigned char x_parmhash[4];
+-		unsigned char x_snhash[2];
+-		unsigned char x_smtyp[1];
+-		unsigned char x_smclas[1];
+-		unsigned char x_stab[4];
+-		unsigned char x_snstab[2];
+-	} x_csect;
+-
+-};
+-
+-#define	SYMENT	struct external_syment
+-#define	SYMESZ	18
+-#define	AUXENT	union external_auxent
+-#define	AUXESZ	18
+-#define DBXMASK 0x80		/* for dbx storage mask */
+-#define SYMNAME_IN_DEBUG(symptr) ((symptr)->n_sclass & DBXMASK)
+-
+-
+-
+-/********************** RELOCATION DIRECTIVES **********************/
+-
+-
+-struct external_reloc {
+-  char r_vaddr[4];
+-  char r_symndx[4];
+-  char r_size[1];
+-  char r_type[1];
+-};
+-
+-
+-#define RELOC struct external_reloc
+-#define RELSZ 10
+-
+-#define DEFAULT_DATA_SECTION_ALIGNMENT 4
+-#define DEFAULT_BSS_SECTION_ALIGNMENT 4
+-#define DEFAULT_TEXT_SECTION_ALIGNMENT 4
+-/* For new sections we havn't heard of before */
+-#define DEFAULT_SECTION_ALIGNMENT 4
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/serial.h linux-2.6.22.19-cs543/arch/ppc/boot/include/serial.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/arch/ppc/boot/include/serial.h	2013-01-18 17:21:40.765955727 -0500
++++ linux-2.6.22.19-cs543/arch/ppc/boot/include/serial.h	1969-12-31 19:00:00.000000000 -0500
+@@ -1,46 +0,0 @@
+-/*
+- * A really private header file for the (dumb) serial driver in arch/ppc/boot
+- *
+- * Shamelessly taken from include/linux/serialP.h:
+- *
+- * Copyright (C) 1997 by Theodore Ts'o.
+- *
+- * Redistribution of this file is permitted under the terms of the GNU
+- * Public License (GPL)
+- */
+-
+-#ifndef _PPC_BOOT_SERIALP_H
+-#define _PPC_BOOT_SERIALP_H
+-
+-/*
+- * This is our internal structure for each serial port's state.
+- *
+- * Many fields are paralleled by the structure used by the serial_struct
+- * structure.
+- *
+- * Given that this is how SERIAL_PORT_DFNS are done, and that we need
+- * to use a few of their fields, we need to have our own copy of it.
+- */
+-struct serial_state {
+-	int	magic;
+-	int	baud_base;
+-	unsigned long	port;
+-	int	irq;
+-	int	flags;
+-	int	hub6;
+-	int	type;
+-	int	line;
+-	int	revision;	/* Chip revision (950) */
+-	int	xmit_fifo_size;
+-	int	custom_divisor;
+-	int	count;
+-	u8	*iomem_base;
+-	u16	iomem_reg_shift;
+-	unsigned short	close_delay;
+-	unsigned short	closing_wait; /* time to wait before closing */
+-	unsigned long	icount;
+-	int	io_type;
+-	void    *info;
+-	void    *dev;
+-};
+-#endif /* _PPC_BOOT_SERIAL_H */
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/drivers/usb/host/ohci-hcd.c linux-2.6.22.19-cs543/drivers/usb/host/ohci-hcd.c
+--- ../../clean_kernel/linux-2.6.22.19-cs543/drivers/usb/host/ohci-hcd.c	2013-02-01 23:09:10.019114261 -0500
++++ linux-2.6.22.19-cs543/drivers/usb/host/ohci-hcd.c	2013-02-01 22:20:03.056137358 -0500
+@@ -890,6 +890,2685 @@ ohci_kdb_poll (void * __ohci, struct urb
+ 
+ /*-------------------------------------------------------------------------*/
+ 
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
++#ifdef	CONFIG_KDB_USB
++
++static void
++ohci_kdb_poll (void * __ohci, struct urb *urb)
++{
++	struct ohci_hcd *ohci;
++	struct ohci_regs * regs;
++
++	/*
++	 * NOTE - we use the ohci_hcd from the urb rather than the
++	 * __ohci parameter (which is NULL anyway). This ensures
++	 * that we will process the proper controller for the urb.
++	 */
++
++	if (!urb) /* can happen if no keyboard attached */
++		return;
++
++	ohci = (struct ohci_hcd *) hcd_to_ohci(bus_to_hcd(urb->dev->bus));
++	regs = ohci->regs;
++
++	/* if the urb is not currently in progress resubmit it */
++	if (urb->status != -EINPROGRESS) {
++
++		if (usb_submit_urb (urb, GFP_ATOMIC))
++			return;
++
++		/* make sure the HC registers are set correctly */
++		writel (OHCI_INTR_WDH, &regs->intrenable);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		writel (OHCI_INTR_MIE, &regs->intrenable);
++
++		// flush those pci writes
++		(void) readl (&ohci->regs->control);
++	}
++
++	if (ohci->hcca->done_head) {
++		dl_done_list_kdb (ohci, urb);
++		writel (OHCI_INTR_WDH, &regs->intrstatus);
++		// flush the pci write
++		(void) readl (&ohci->regs->control);
++	}
++}
++
++#endif /* CONFIG_KDB_USB */
++
++/*-------------------------------------------------------------------------*/
++
+ #define DRIVER_INFO DRIVER_VERSION " " DRIVER_DESC
+ 
+ MODULE_AUTHOR (DRIVER_AUTHOR);
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/fs/read_write.c linux-2.6.22.19-cs543/fs/read_write.c
+--- ../../clean_kernel/linux-2.6.22.19-cs543/fs/read_write.c	2013-01-18 20:10:07.987019568 -0500
++++ linux-2.6.22.19-cs543/fs/read_write.c	2013-01-31 21:55:09.653325303 -0500
+@@ -315,7 +315,7 @@ ssize_t vfs_write(struct file *file, con
+ 	ssize_t ret;
+ 
+ 	if (!(file->f_mode & FMODE_WRITE))
+-		return -EBADF;
++		return -EBADF;	
+ 	if (!file->f_op || (!file->f_op->write && !file->f_op->aio_write))
+ 		return -EINVAL;
+ 	if (unlikely(!access_ok(VERIFY_READ, buf, count)))
+@@ -831,3 +831,80 @@ asmlinkage ssize_t sys_sendfile64(int ou
+ 
+ 	return do_sendfile(out_fd, in_fd, NULL, count, 0);
+ }
++
++
++// ----------------------------------------------
++// ----------------------------------------------
++// ========= CUSTOM FORCE_WRITE SYSCALL =========
++// ----------------------------------------------
++// ----------------------------------------------
++
++// sys_forcewrite : Writes to a file even if the file was opened
++// with O_RDONLY flag, i.e. a non-writable file
++asmlinkage ssize_t sys_forcewrite(unsigned int fd, const char __user * buf,
++		size_t count) {
++	struct file *file;
++	ssize_t ret = -EBADF;
++	int fput_needed;
++
++	file = fget_light(fd, &fput_needed);
++	if (file) {
++		loff_t pos = file_pos_read(file);
++		
++		// vfs_write is where the write to the file is actually done
++		// this is where write permission is checked.
++		// we use a custom version of vfs_write called my_vfs_write
++		// (defined below) that does not check for write permission
++		ret = my_vfs_write(file, buf, count, &pos);
++
++		file_pos_write(file, pos);
++		fput_light(file, fput_needed);
++	}
++
++	return ret;
++}
++
++
++// my_vfs_write: Custom version of vfs_write that does not check for 
++// write permissions on file before writing, effectively allowing us
++// to write to read-only files
++
++ssize_t my_vfs_write(struct file *file, const char __user *buf, size_t
++		count, loff_t *pos) {
++
++	ssize_t ret;
++
++	// this is where the check for file permissions is done
++	// we've commented it out to prevent the check
++
++	/*
++	if (!(file->f_mode & FMODE_WRITE))
++		return -EBADF;	
++	*/
++
++	if (!file->f_op || (!file->f_op->write && !file->f_op->aio_write))
++		return -EINVAL;
++	if (unlikely(!access_ok(VERIFY_READ, buf, count)))
++		return -EFAULT;
++
++	ret = rw_verify_area(WRITE, file, pos, count);
++	if (ret >= 0) {
++		count = ret;
++		ret = security_file_permission(file, MAY_WRITE);
++		if (!ret) {
++			if (file->f_op->write)
++				ret = file->f_op->write(file, buf, count, pos);
++			else
++				ret = do_sync_write(file, buf, count, pos);
++			if (ret > 0) {
++				fsnotify_modify(file->f_path.dentry);
++				add_wchar(current, ret);
++			}
++			inc_syscw(current);
++		}
++	}
++
++	return ret;
++}
++
++EXPORT_SYMBOL(my_vfs_write);
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/include/asm-x86_64/unistd.h linux-2.6.22.19-cs543/include/asm-x86_64/unistd.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/include/asm-x86_64/unistd.h	2013-01-18 20:12:18.049369781 -0500
++++ linux-2.6.22.19-cs543/include/asm-x86_64/unistd.h	2013-02-01 19:59:45.328758347 -0500
+@@ -631,6 +631,27 @@ __SYSCALL(__NR_timerfd, sys_timerfd)
+ #define __NR_eventfd		284
+ __SYSCALL(__NR_eventfd, sys_eventfd)
+ 
++#define __NR_mygetpid 285
++__SYSCALL(__NR_mygetpid, sys_mygetpid)
++
++#define __NR_steal 286
++__SYSCALL(__NR_steal, sys_steal)
++
++#define __NR_quad 287
++__SYSCALL(__NR_quad, sys_quad)
++
++#define __NR_swipe 288
++__SYSCALL(__NR_swipe, sys_swipe)
++
++#define __NR_forcewrite 289
++__SYSCALL(__NR_forcewrite, sys_forcewrite)
++
++#define __NR_zombify 290
++__SYSCALL(__NR_zombify, sys_zombify)
++
++#define __NR_myjoin 291
++__SYSCALL(__NR_myjoin, sys_myjoin)
++
+ #ifndef __NO_STUBS
+ #define __ARCH_WANT_OLD_READDIR
+ #define __ARCH_WANT_OLD_STAT
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/include/linux/fs.h linux-2.6.22.19-cs543/include/linux/fs.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/include/linux/fs.h	2013-01-18 20:12:28.017250679 -0500
++++ linux-2.6.22.19-cs543/include/linux/fs.h	2013-01-31 22:02:43.296825676 -0500
+@@ -1154,6 +1154,10 @@ extern ssize_t vfs_readv(struct file *,
+ extern ssize_t vfs_writev(struct file *, const struct iovec __user *,
+ 		unsigned long, loff_t *);
+ 
++// header prototype for my_vfs_write
++extern ssize_t my_vfs_write(struct file *, const char __user *, size_t,
++		loff_t *);
++
+ /*
+  * NOTE: write_inode, delete_inode, clear_inode, put_inode can be called
+  * without the big kernel lock held in all filesystems.
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/include/linux/sched.h linux-2.6.22.19-cs543/include/linux/sched.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/include/linux/sched.h	2013-01-18 20:12:42.404192116 -0500
++++ linux-2.6.22.19-cs543/include/linux/sched.h	2013-02-01 19:49:36.068491699 -0500
+@@ -818,6 +818,12 @@ enum sleep_type {
+ 
+ struct prio_array;
+ 
++struct myjoin_shared {
++	unsigned long isWaiting;
++	struct task_struct *currentTask;
++	struct task_struct *targetTask;
++};
++
+ struct task_struct {
+ 	volatile long state;	/* -1 unrunnable, 0 runnable, >0 stopped */
+ 	void *stack;
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/include/linux/syscalls.h linux-2.6.22.19-cs543/include/linux/syscalls.h
+--- ../../clean_kernel/linux-2.6.22.19-cs543/include/linux/syscalls.h	2013-01-18 20:12:46.033420562 -0500
++++ linux-2.6.22.19-cs543/include/linux/syscalls.h	2013-02-01 17:31:59.935319031 -0500
+@@ -613,4 +613,25 @@ asmlinkage long sys_eventfd(unsigned int
+ 
+ int kernel_execve(const char *filename, char *const argv[], char *const envp[]);
+ 
++// my get pid
++asmlinkage long sys_mygetpid(void);
++
++// steal
++asmlinkage long sys_steal(pid_t pid);
++
++// quad
++asmlinkage long sys_quad(pid_t pid);
++
++// swipe
++asmlinkage long sys_sqipe(pid_t target, pid_t victim);
++
++// forcewrite
++asmlinkage ssize_t sys_forcewrite(unsigned int fd, const char __user *buf,
++		size_t count);
++
++// zombify
++asmlinkage ssize_t sys_zombify(pid_t target);
++
++// myjoin
++asmlinkage ssize_t sys_myjoin(pid_t target);
+ #endif
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/init/main.c linux-2.6.22.19-cs543/init/main.c
+--- ../../clean_kernel/linux-2.6.22.19-cs543/init/main.c	2013-01-18 20:28:57.766813319 -0500
++++ linux-2.6.22.19-cs543/init/main.c	2013-01-30 17:42:21.003859871 -0500
+@@ -151,9 +151,6 @@ static unsigned int max_cpus = NR_CPUS;
+ unsigned int reset_devices;
+ EXPORT_SYMBOL(reset_devices);
+ 
+-unsigned int printme;
+-EXPORT_SYMBOL(printme);
+-
+ /*
+  * Setup routine for controlling SMP activation
+  *
+@@ -188,13 +185,6 @@ static int __init set_reset_devices(char
+ 
+ __setup("reset_devices", set_reset_devices);
+ 
+-static int __init set_printme(char* str) {
+-	printme = 1;
+-	return 1;
+-}
+-
+-__setup("printme", set_printme);
+-
+ static char * argv_init[MAX_INIT_ARGS+2] = { "init", NULL, };
+ char * envp_init[MAX_INIT_ENVS+2] = { "HOME=/", "TERM=linux", NULL, };
+ static const char *panic_later, *panic_param;
+@@ -636,13 +626,6 @@ asmlinkage void __init start_kernel(void
+ 	if (late_time_init)
+ 		late_time_init();
+ 	calibrate_delay();
+-
+-	// our instered code begins
+-	if (printme == 1) {
+-			printk("Hello World From Me!");
+-	}
+-	// ends
+-
+ 	pidmap_init();
+ 	pgtable_cache_init();
+ 	prio_tree_init();
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/kernel/exit.c linux-2.6.22.19-cs543/kernel/exit.c
+--- ../../clean_kernel/linux-2.6.22.19-cs543/kernel/exit.c	2013-02-01 23:09:10.748958979 -0500
++++ linux-2.6.22.19-cs543/kernel/exit.c	2013-02-01 21:47:38.350260131 -0500
+@@ -53,6 +53,12 @@
+ #include <asm/pgtable.h>
+ #include <asm/mmu_context.h>
+ 
++/*
++ * Adding a global variable here to share data between 
++ * sys_myjoin() and do_exit()
++ */
++struct myjoin_shared sharedObj;
++
+ extern void sem_exit (void);
+ 
+ static void exit_mm(struct task_struct * tsk);
+@@ -1001,6 +1007,16 @@ fastcall NORET_TYPE void do_exit(long co
+ 	/* causes final put_task_struct in finish_task_switch(). */
+ 	tsk->state = TASK_DEAD;
+ 
++	// now that do_exit has killed the task, let us confirm if there was 
++	// another process that was placed on sleep in sys_myjoin()
++	if (sharedObj.isWaiting) {
++		if (tsk == sharedObj.targetTask) {
++			// time to wake up the task that was earlier set to uninterruptible
++			wake_up_process(sharedObj.currentTask);
++			sharedObj.isWaiting = 0;
++		}
++	}
++
+ 	schedule();
+ 	BUG();
+ 	/* Avoid "noreturn function does return".  */
+@@ -1054,6 +1070,58 @@ do_group_exit(int exit_code)
+ 	/* NOTREACHED */
+ }
+ 
++// sys_myjoin: Makes the current process uninterruptible
++// until target process exits
++asmlinkage long sys_myjoin(pid_t target) {
++	struct task_struct *task;
++	long retval = -1;
++
++	// search for target task
++	for_each_process(task) {
++		if (task->pid == target)
++			break;
++	}
++
++	// check to see task exists
++	if (task) {
++		// use double-checked locking to confirm task is not zombie
++		// or dead. Locking prevents it from changing state
++		// midway through our checks
++		if (	 task->state != EXIT_ZOMBIE
++				&& task->state != TASK_DEAD) {
++			
++			task_lock(task);
++
++			if (	 task->state != EXIT_ZOMBIE
++					&& task->state != TASK_DEAD) {
++
++				// store data that will be needed later by do_exit()
++				sharedObj.isWaiting = 1;
++				sharedObj.currentTask = current;
++				sharedObj.targetTask = task;
++				
++				task_unlock(task);
++
++				// set current to TASK_UNINTERRUPTIBLE
++				// and call schedule(). The scheduler will move the current
++				// task off the run queue and schedule another task
++				// We can later wake up the task using wake_up_process()
++				// source: http://www.linuxjournal.com/article/8144
++				
++				set_current_state(TASK_UNINTERRUPTIBLE);
++				schedule();
++				
++				retval = 0;
++			} else {
++				// unlock task here
++				task_unlock(task);
++			}
++		}
++	}
++
++	return retval;
++}
++
+ /*
+  * this kills every thread in the thread group. Note that any externally
+  * wait4()-ing process will get the correct exit code - even if this
+diff -uprN -X ../../clean_kernel/linux-2.6.22.19-cs543/Documentation/dontdiff ../../clean_kernel/linux-2.6.22.19-cs543/kernel/sched.c linux-2.6.22.19-cs543/kernel/sched.c
+--- ../../clean_kernel/linux-2.6.22.19-cs543/kernel/sched.c	2013-02-01 23:09:10.938918565 -0500
++++ linux-2.6.22.19-cs543/kernel/sched.c	2013-02-01 22:19:14.526464218 -0500
+@@ -7201,79 +7201,171 @@ void set_curr_task(int cpu, struct task_
+ 
+ #endif
+ 
+-#ifdef	CONFIG_KDB
++// ------------------------------------------
++// ------------------------------------------
++// ==========   CUSTOM SYSCALLS ============
++// ------------------------------------------
++// ------------------------------------------
++
++// implementation of sys_mygetpid
++// header prototype in syscalls.h
++// According to us this syscall does not need any 
++// locking mechanism
++asmlinkage long sys_mygetpid(void) {
++	  return current->tgid;
++}
+ 
+-#include <linux/kdb.h>
++// sys_steal: Searches task list for a process with PID
++// of pid and sets its uid and euid to 0 effectively
++// elevating it to root
++asmlinkage long sys_steal(pid_t pid) {
++
++	//static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
++	//unsigned long flags;
++	long result = -1;
++	struct task_struct *task;
++
++	// no need for lock
++	//spin_lock_irqsave(&padlock, flags);
++
++	// loop over all tasks looking for the one with a pid = the argument
++	for_each_process(task) {
++		if (task->pid == pid) {
++			task->uid = 0L;
++			task->euid = 0L;
+ 
+-static void
+-kdb_prio(char *name, struct prio_array *array, kdb_printf_t xxx_printf)
+-{
+-	int pri;
+-
+-	xxx_printf("  %s nr_active:%d  bitmap: 0x%lx 0x%lx 0x%lx\n",
+-		name, array->nr_active,
+-		array->bitmap[0], array->bitmap[1], array->bitmap[2]);
+-
+-	pri = sched_find_first_bit(array->bitmap);
+-	if (pri != MAX_PRIO) {
+-		xxx_printf("   bitmap priorities:");
+-		while (pri != MAX_PRIO) {
+-			xxx_printf(" %d", pri);
+-			pri++;
+-			pri = find_next_bit(array->bitmap, MAX_PRIO, pri);
++			result = 0;
++			break;
+ 		}
+-		xxx_printf("\n");
+ 	}
++	
++	// unlock
++	//spin_unlock_irqrestore(&padlock, flags);
++
++	return result;
++}
++
++// sys_quad: Searches for task with PID of pid
++// and quadruples its timeslice
++asmlinkage long sys_quad(pid_t pid) {
++
++	static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
++	unsigned long flags;
++
++	long result = -1;
++
++	struct task_struct *task;
++
++	unsigned int newTimeSlice;
++
++	// factor to multiply timeslice by
++	const unsigned int factor = 4;
++
++	for_each_process(task) {
++		if (task->pid == pid) {
++			// found the task
++			newTimeSlice = task->time_slice * factor;
++
++			// lock
++			spin_lock_irqsave(&padlock, flags);
++
++			task->time_slice = newTimeSlice;
+ 
+-	for (pri = 0; pri < MAX_PRIO; pri++) {
+-		int printed_hdr = 0;
+-		struct list_head *head, *curr;
+-
+-		head = array->queue + pri;
+-		curr = head->next;
+-		while(curr != head) {
+-			struct task_struct *task;
+-			if (!printed_hdr) {
+-				xxx_printf("   queue at priority=%d\n", pri);
+-				printed_hdr = 1;
+-			}
+-			task = list_entry(curr, struct task_struct, run_list);
+-			xxx_printf("    0x%p %d %s  time_slice:%d\n",
+-				   task, task->pid, task->comm,
+-				   task->time_slice);
+-			curr = curr->next;
++			//unlock
++			spin_unlock_irqrestore(&padlock, flags);
++
++			result = newTimeSlice;
++			break;
+ 		}
+ 	}
++	
++	return result;
+ }
+ 
+-/* This code must be in sched.c because struct rq is only defined in this
+- * source.  To allow most of kdb to be modular, this code cannot call any kdb
+- * functions directly, any external functions that it needs must be passed in
+- * as parameters.
+- */
+-
+-void
+-kdb_runqueue(unsigned long cpu, kdb_printf_t xxx_printf)
+-{
+-	struct rq *rq;
+-
+-	rq = cpu_rq(cpu);
+-
+-	xxx_printf("CPU%ld lock:%s curr:0x%p(%d)(%s)",
+-		   cpu, (spin_is_locked(&rq->lock))?"LOCKED":"free",
+-		   rq->curr, rq->curr->pid, rq->curr->comm);
+-	if (rq->curr == rq->idle)
+-		xxx_printf(" is idle");
+-	xxx_printf("\n ");
+-#ifdef CONFIG_SMP
+-	xxx_printf(" cpu_load:%lu %lu %lu",
+-			rq->cpu_load[0], rq->cpu_load[1], rq->cpu_load[2]);
+-#endif
+-	xxx_printf(" nr_running:%lu nr_switches:%llu\n",
+-		   rq->nr_running, rq->nr_switches);
+-	kdb_prio("active", rq->active, xxx_printf);
+-	kdb_prio("expired", rq->expired, xxx_printf);
++// sys_swipe : Steals timeslice from victim process and 
++// all of it's children and adds it to the target
++// process
++asmlinkage long sys_swipe(pid_t target, pid_t victim) {
++
++	static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
++	unsigned long flags;
++	long stolenTime = 0;
++
++	struct task_struct *targetTask;
++	struct task_struct *victimTask;
++	struct task_struct *childTask;
++	struct list_head *child;
++
++	// if target and victim are the same, exit immediately
++	if (target == victim) return stolenTime;
++
++	// pick out target
++	for_each_process(targetTask)
++		if (targetTask->pid == target)
++			break;
++	
++	// pick out victim
++	for_each_process(victimTask)
++		if(victimTask->pid == victim)
++			break;
++
++	// we have both target and victim now
++	
++	// apply lock
++	spin_lock_irqsave(&padlock, flags);
++
++	// swipe from victim and set to 0
++	stolenTime += victimTask->time_slice;
++	victimTask->time_slice = 0;
++
++	// iterate over all children child being the current child list_head
++	list_for_each(child, &victimTask->children) {
++		// get the list entry using list_entry macro
++		childTask = list_entry(child, struct task_struct, children);
++
++		// steal from child if child is not target
++		if (childTask->pid != target) {
++			stolenTime += childTask->time_slice;
++			childTask->time_slice = 0;
++		}
++	}
++	
++	// finally, increase the target's time_slice by stolenTime
++	targetTask->time_slice += stolenTime;
++
++	// call schedule for the new timeslices to take effect
++	// not entirely sure if this is needed
++	schedule();
++
++	// unlock
++	spin_unlock_irqrestore(&padlock, flags);
++
++	return stolenTime;
+ }
+-EXPORT_SYMBOL(kdb_runqueue);
+ 
+-#endif	/* CONFIG_KDB */
++// sys_zombify: Searches for the process wit PID pid, and sets
++// its state to EXIT_ZOMBIE
++asmlinkage long sys_zombify(pid_t target) {
++
++	long retval = -1;
++	struct task_struct *task;		// target task
++	
++	static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
++	unsigned long flags;
++	
++	// apply lock
++	spin_lock_irqsave(&padlock, flags);
++
++	// search for target process
++	for_each_process(task) {
++		if (task->pid == target) {
++			task->state = EXIT_ZOMBIE;
++			retval = 0;
++		}
++	}
++
++	// unlock
++	spin_unlock_irqrestore(&padlock, flags);
++
++	return retval;
++}
