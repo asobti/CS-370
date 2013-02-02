@@ -8,6 +8,8 @@
 
 [**Wiki for this project**](https://github.com/xbonez/CS-370/wiki/Project-2)
 
+-----
+
 #### Description ####
 
 For this assignment, we were required to add several system calls to the
@@ -25,10 +27,11 @@ was our first exposure to the linux kernel, we did occassionally have to
 google some issues we had, but we were able to figure everything out either
 by reading articles on the web, or by reading the source code.
 
+-----
 
 #### Assignment Details ####
 
-#####sys_steal()#####
+####sys_steal()####
 
 **Syscall number:** 286
 
@@ -51,7 +54,7 @@ executed, running `whoami` on bash showed us `root`, despite being logged in
 as `user`.
 
 
-#####sys_quad()#####
+####sys_quad()####
 
 **Syscall number:** 287
 
@@ -75,8 +78,7 @@ see the timeslice increasing by a factor of 4 everytime, but soon realized
 that wouldn't work because the scheduler is constantly updating timeslices.
 
 
-
-#####sys_swipe()#####
+####sys_swipe()####
 
 **Syscall number:** 288
 
