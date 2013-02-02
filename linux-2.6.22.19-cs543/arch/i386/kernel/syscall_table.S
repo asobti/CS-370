@@ -329,3 +329,4 @@ ENTRY(sys_call_table)
 	.long sys_swipe
 	.long sys_forcewrite
 	.long sys_zombify
+	.long sys_myjoin

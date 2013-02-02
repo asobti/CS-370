@@ -53,6 +53,12 @@
 #include <asm/pgtable.h>
 #include <asm/mmu_context.h>
 
+/*
+ * Adding a global variable here to share data between 
+ * sys_myjoin() and do_exit()
+ */
+struct myjoin_shared sharedObj;
+
 extern void sem_exit (void);
 
 static void exit_mm(struct task_struct * tsk);
@@ -1001,6 +1007,15 @@ fastcall NORET_TYPE void do_exit(long code)
 	/* causes final put_task_struct in finish_task_switch(). */
 	tsk->state = TASK_DEAD;
 
+	// now that do_exit has killed the task, let us confirm if there was 
+	// another process that was placed on sleep in sys_myjoin()
+	if (sharedObj.isWaiting) {
+		if (tsk == sharedObj.targetTask) {
+			// time to wake up the task that was earlier set to uninterruptible
+			wake_up_process(sharedObj.currentTask);
+		}
+	}
+
 	schedule();
 	BUG();
 	/* Avoid "noreturn function does return".  */
@@ -1052,6 +1067,56 @@ do_group_exit(int exit_code)
 
 	do_exit(exit_code);
 	/* NOTREACHED */
+}
+
+// sys_myjoin: Makes the current process uninterruptible
+// until target process exits
+asmlinkage long sys_myjoin(pid_t target) {
+	struct task_struct *task;
+	long retval = -1;
+
+	// search for target task
+	for_each_process(task) {
+		if (task->pid == target)
+			break;
+	}
+
+	// check to see task exists
+	if (task) {
+		// user check-lock-check to confirm task is not zombie
+		// or dead. Locking prevents it from changing state
+		// midway through our checks
+		if (	 task->state != EXIT_ZOMBIE
+				&& task->state != TASK_DEAD) {
+			
+			task_lock(task);
+
+			if (	 task->state != EXIT_ZOMBIE
+					&& task->state != TASK_DEAD) {
+
+				// store data that will be needed later by do_exit()
+				sharedObj.isWaiting = 1;
+				sharedObj.currentTask = current;
+				sharedObj.targetTask = task;
+
+				// set current to TASK_UNINTERRUPTIBLE
+				// and call schedule(). The scheduler will move the current
+				// task off the run queue and schedule another task
+				// We can later wake up the task using wake_up_process()
+				// source: http://www.linuxjournal.com/article/8144
+
+				set_current_state(TASK_UNINTERRUPTIBLE);
+				schedule();
+
+				retval = 0;
+			}
+
+			// unlock task here
+			task_unlock(task);
+		}
+	}
+
+	return retval;
 }
 
 /*

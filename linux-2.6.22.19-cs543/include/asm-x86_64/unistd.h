@@ -649,6 +649,9 @@ __SYSCALL(__NR_forcewrite, sys_forcewrite)
 #define __NR_zombify 290
 __SYSCALL(__NR_zombify, sys_zombify)
 
+#define __NR_myjoin 291
+__SYSCALL(__NR_myjoin, sys_myjoin)
+
 #ifndef __NO_STUBS
 #define __ARCH_WANT_OLD_READDIR
 #define __ARCH_WANT_OLD_STAT

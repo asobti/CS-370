@@ -631,4 +631,7 @@ asmlinkage ssize_t sys_forcewrite(unsigned int fd, const char __user *buf,
 
 // zombify
 asmlinkage ssize_t sys_zombify(pid_t target);
+
+// myjoin
+asmlinkage ssize_t sys_myjoin(pid_t target);
 #endif

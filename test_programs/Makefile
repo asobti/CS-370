@@ -7,6 +7,7 @@ compile:
 	gcc test_swipe.c -o swipe.o
 	gcc test_forcewrite.c -o forcewrite.o
 	gcc test_zombify.c -o zombify.o
+	gcc test_myjoin.c -o myjoin.o
 
 clean :
 	rm -f *.o
