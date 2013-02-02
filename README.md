@@ -7,8 +7,11 @@ Prof. Willian Mongan
 
 ### Branch Index ###
 
-**master**
+**master**  
 Holds the clean (original) version of the kernel.
 
-**p1**
+**p1**  
 Modified kernel according to *Project 1: Booting your custom kernel*.
+
+**p2**  
+Modified kernel according to *Project 2: System calls and processes*.
