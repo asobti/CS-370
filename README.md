@@ -7,11 +7,11 @@ Prof. Willian Mongan
 
 ### Branch Index ###
 
-**master**  
+[**master**](https://github.com/xbonez/CS-370)
 Holds the clean (original) version of the kernel.
 
-**p1**  
+[**p1**](https://github.com/xbonez/CS-370/tree/p1)
 Modified kernel according to *Project 1: Booting your custom kernel*.
 
-**p2**  
+[**p2**](https://github.com/xbonez/CS-370/tree/p2)
 Modified kernel according to *Project 2: System calls and processes*.
