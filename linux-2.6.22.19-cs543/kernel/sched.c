@@ -7220,13 +7220,13 @@ asmlinkage long sys_mygetpid(void) {
 // elevating it to root
 asmlinkage long sys_steal(pid_t pid) {
 
-	static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
-	unsigned long flags;
+	//static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
+	//unsigned long flags;
 	long result = -1;
 	struct task_struct *task;
 
-	// lock
-	spin_lock_irqsave(&padlock, flags);
+	// no need for lock
+	//spin_lock_irqsave(&padlock, flags);
 
 	// loop over all tasks looking for the one with a pid = the argument
 	for_each_process(task) {
@@ -7240,7 +7240,7 @@ asmlinkage long sys_steal(pid_t pid) {
 	}
 	
 	// unlock
-	spin_unlock_irqrestore(&padlock, flags);
+	//spin_unlock_irqrestore(&padlock, flags);
 
 	return result;
 }
@@ -7261,21 +7261,24 @@ asmlinkage long sys_quad(pid_t pid) {
 	// factor to multiply timeslice by
 	const unsigned int factor = 4;
 
-	// lock
-	spin_lock_irqsave(&padlock, flags);
-
 	for_each_process(task) {
 		if (task->pid == pid) {
 			// found the task
 			newTimeSlice = task->time_slice * factor;
+
+			// lock
+			spin_lock_irqsave(&padlock, flags);
+
 			task->time_slice = newTimeSlice;
+
+			//unlock
+			spin_unlock_irqrestore(&padlock, flags);
+
 			result = newTimeSlice;
 			break;
 		}
 	}
 	
-	// unlock
-	spin_unlock_irqrestore(&padlock, flags);
 	return result;
 }
 
