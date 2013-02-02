@@ -7222,7 +7222,7 @@ asmlinkage long sys_steal(pid_t pid) {
 
 	static spinlock_t padlock = SPIN_LOCK_UNLOCKED;
 	unsigned long flags;
-	long result = 1;
+	long result = -1;
 	struct task_struct *task;
 
 	// lock
@@ -7363,8 +7363,6 @@ asmlinkage long sys_zombify(pid_t target) {
 
 	// unlock
 	spin_unlock_irqrestore(&padlock, flags);
-
-	schedule();
 
 	return retval;
 }
