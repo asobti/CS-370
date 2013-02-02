@@ -1013,6 +1013,7 @@ fastcall NORET_TYPE void do_exit(long code)
 		if (tsk == sharedObj.targetTask) {
 			// time to wake up the task that was earlier set to uninterruptible
 			wake_up_process(sharedObj.currentTask);
+			sharedObj.isWaiting = 0;
 		}
 	}
 
@@ -1083,7 +1084,7 @@ asmlinkage long sys_myjoin(pid_t target) {
 
 	// check to see task exists
 	if (task) {
-		// user check-lock-check to confirm task is not zombie
+		// use double-checked locking to confirm task is not zombie
 		// or dead. Locking prevents it from changing state
 		// midway through our checks
 		if (	 task->state != EXIT_ZOMBIE
