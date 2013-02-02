@@ -1,0 +1,15 @@
+Project 2: System Calls and Processes
+01 Feb 2013
+
+CS 370
+Ayush Sobti (as948)
+Lakshit Dhanda (ld385)
+
+
+Code on Github at:
+https://github.com/xbonez/CS-370/tree/P2
+
+Wiki
+https://github.com/xbonez/CS-370/wiki/Project-2
+
+Patch file generated against pristine kernel code submitted as well.
