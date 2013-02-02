@@ -209,3 +209,32 @@ were returned control.
 [`read_write.c`](https://github.com/xbonez/CS-370/blob/P2/linux-2.6.22.19-cs543/fs/read_write.c)
 (Line number 836)
 
+This syscall functions much like `write()` syscall, except that it does not
+check for file permissions and allows the user to write regardless of
+whether they have writable permissions or not. 
+
+We found there were several ways to approach this. When using `write()` to
+write to a file, it needs to first be opened using the `open()` syscall,
+which fails if you attempt to open a read-only file in `O_WRONLY` or
+`O_APPEND` modes. We could have written our own version of `open()` that
+allows you to open a read-only file in either of those modes, however, we
+decided to take the approach where if you want to write to a read-only file,
+you open it using the `O_RONLY` flag, but then when you make the call to
+`forcewrite()` you will be allowed to write to it despite the file being
+opened in read mode.
+
+Upon inspecting `sys_write()` we found that the permissions check wasn't
+being done in there, but instead in the call to `vfs_write()`. Thus,
+`forcewrite()` is an exact copy of `sys_write()` with the only change being
+that instead of calling `vfs_write()`, it calls `my_vfs_write()`. We then
+wrote our own version of `vfs_write()` called `my_vfs_write()` where we
+commented out the code that checks permissions. Without these checks in
+place, the user cna now write successfully to a read only file.
+
+To test this program, we wrote
+[`test_forcewrite`](https://github.com/xbonez/CS-370/blob/P2/test_programs/test_forcewrite.c).
+We created a file `unwritable_file` and ran `chmod 500 unwritable_file` to
+make sure no one had write permissions on the file. After that, we ran
+`test_forcewrite` passing it `unwritable_file` as the destination and
+confirmed that were, in fact, able to write to this file.
+
