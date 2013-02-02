@@ -17,8 +17,8 @@ The work was done on the linux kernel (ver. 2.6.22.19).
 Compilation was done on Tux, using gcc (ver. 4.6.3).
 Versioning was done using Git, hosted on Github.
 
-All implemented syscalls were tested using test programs we created (placed
-in test_programs). As far as we can tell, all syscalls work as expected.
+All implemented syscalls were tested using test programs we created, located
+in [test_programs](https://github.com/xbonez/CS-370/tree/P2/test_programs). As far as we can tell, all syscalls work as expected.
 
 This was an interesting, and moderately challenging assignment. Since this
 was our first exposure to the linux kernel, we did occassionally have to
