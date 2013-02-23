@@ -1,0 +1,10 @@
+--- arch/i386/Makefile
++++ arch/i386/Makefile
+@@ -108,6 +108,7 @@
+ # must be linked after kernel/
+ drivers-$(CONFIG_OPROFILE)		+= arch/i386/oprofile/
+ drivers-$(CONFIG_PM)			+= arch/i386/power/
++drivers-$(CONFIG_KDB)			+= arch/i386/kdb/
+ 
+ CFLAGS += $(mflags-y)
+ AFLAGS += $(mflags-y)
