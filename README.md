@@ -1,4 +1,4 @@
-## Project 2: System Calls and Processes ##
+## Project 4: Fair Share Scheduling ##
 
 **Prof. Willian Mongan**
 
