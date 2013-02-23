@@ -227,61 +227,25 @@ static inline void sg_inc_cpu_power(struct sched_group *sg, u32 val)
  * ((TIMESLICE_USER_FACTOR * DEF_TIMESLICE) / USER_PROCESSES)
  */
 static inline unsigned int task_timeslice(struct task_struct *p)
-{
-	
-	// We assume there are never more than 20 logged in users at a given time
-	// const unsigned int MAX_USERS = 20;
+{	
+	const int TIMESLICE_USER_FACTOR = 5;
 
-	// We reserve TIMESLICE_USER_FACTOR * DEF_TIMESLICE for each user
-	// const unsigned int TIMESLICE_USER_FACTOR = 5;
-
-	// count of total users
-	// unsigned int user_count = 0;
-
-	// int loop_counter;	
-
-	// struct task_struct *task;
 	struct user_struct* current_user;
-
 	unsigned int timeslice;
+	atomic_t processes;	
 
-	// store uids of users here. Needed to make sure we don't count 
-	// the same user twice
-	// uid_t logged_in_uids[20];
-
-	/*for_each_process(task) {
-		int user_exists = 0;
-
-		// check if we have counted this user before
-		for (loop_counter = 0; loop_counter < MAX_USERS; loop_counter++) {
-			if (logged_in_uids[loop_counter] == task->uid) {
-				// user has already been counted
-				user_exists = 1;
-			}
-		}
-
-		if (user_exists == 0) {
-			logged_in_uids[user_count] = task->uid;
-			user_count++;
-		}
-	}*/	
-
-	// get the user_struct for the user running the current task
-	// current_user = find_user(p->uid);
 	current_user = p->user;
-	atomic_t processes = current_user->processes;
-	int process_count = atomic_read(&processes);
+	processes = current_user->processes;
+
 	// we reserve (TIMESLICE_USER_FACTOR * DEF_TIMESLICE) for each user. 
 	// So, if a user has x processes running, each of
 	// them get ((TIMESLICE_USER_FACTOR * DEF_TIMESLICE) / x) milliseconds
 	// We don't need to worry about division by 0, because we're getting current_user
 	// from the current task, thus it is guaranteed that the current_user always has
-	// atleast one task
-	// atomic_t process_count = current_user->processes;
-	timeslice = 5 * DEF_TIMESLICE / process_count;
-	// timeslice = (TIMESLICE_USER_FACTOR * DEF_TIMESLICE) / 10;
+	// atleast one task	
+	timeslice = (unsigned int)(TIMESLICE_USER_FACTOR * DEF_TIMESLICE / atomic_read(&processes));
 	
-	return 200;
+	return timeslice;
 }
 
 /*
