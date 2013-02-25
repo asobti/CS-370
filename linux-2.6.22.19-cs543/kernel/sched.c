@@ -229,6 +229,7 @@ static inline void sg_inc_cpu_power(struct sched_group *sg, u32 val)
 static inline unsigned int task_timeslice(struct task_struct *p)
 {	
 	const int TIMESLICE_USER_FACTOR = 5;
+	const int USER_DEF_TIMESLICE = TIMESLICE_USER_FACTOR * DEF_TIMESLICE;
 
 	struct user_struct* current_user;
 	unsigned int timeslice;
@@ -243,7 +244,7 @@ static inline unsigned int task_timeslice(struct task_struct *p)
 	// We don't need to worry about division by 0, because we're getting current_user
 	// from the current task, thus it is guaranteed that the current_user always has
 	// atleast one task	
-	timeslice = (unsigned int)(TIMESLICE_USER_FACTOR * DEF_TIMESLICE / atomic_read(&processes));
+	timeslice = (unsigned int)(USER_DEF_TIMESLICE / atomic_read(&processes));
 	
 	return timeslice;
 }
