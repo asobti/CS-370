@@ -79,6 +79,19 @@ static int proc_calc_metrics(char *page, char **start, off_t off,
 	return len;
 }
 
+static int read_myproc(char *page, char **start, off_t off, int count, int *eof, void *data)
+{	
+    int len;
+
+    /*
+     * Get the current time and format it.
+     */
+    len = sprintf(page, "this is what you need to implement\n");
+    // *my_buffer = buffer;
+    // return len;
+    return proc_calc_metrics(page, start, off, count, eof, len);
+}
+
 static int loadavg_read_proc(char *page, char **start, off_t off,
 				 int count, int *eof, void *data)
 {
@@ -775,6 +788,7 @@ void __init proc_misc_init(void)
 		char *name;
 		int (*read_proc)(char*,char**,off_t,int,int*,void*);
 	} *p, simple_ones[] = {
+		{"myproc", read_myproc},
 		{"loadavg",     loadavg_read_proc},
 		{"uptime",	uptime_read_proc},
 		{"meminfo",	meminfo_read_proc},
