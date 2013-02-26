@@ -82,11 +82,23 @@ static int proc_calc_metrics(char *page, char **start, off_t off,
 static int read_myproc(char *page, char **start, off_t off, int count, int *eof, void *data)
 {	
     int len;
-
+    static char buffer[5000];
+    unsigned int buf_pos = 0;
     /*
      * Get the current time and format it.
      */
-    len = sprintf(page, "this is what you need to implement\n");
+    struct task_struct *task;
+    for_each_process(task) {
+    	// prevent overflow
+    	if (buf_pos > 4900)
+    		break;
+
+    	buf_pos += sprintf(&buffer[buf_pos], "User: %s \tPID:%ld \tCPU Time: %d\n", (long)task->user->uid, (long)task->pid, 10);
+    	// buf_pos += sprintf(&buffer[buf_pos], "Foobar\n");
+    }
+
+    len = sprintf(page, buffer);
+
     // *my_buffer = buffer;
     // return len;
     return proc_calc_metrics(page, start, off, count, eof, len);
