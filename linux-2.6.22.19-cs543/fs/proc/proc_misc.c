@@ -93,7 +93,7 @@ static int read_myproc(char *page, char **start, off_t off, int count, int *eof,
     	if (buf_pos > 4900)
     		break;
 
-    	buf_pos += sprintf(&buffer[buf_pos], "User: %s \tPID:%ld \tCPU Time: %d\n", (long)task->user->uid, (long)task->pid, 10);
+    	buf_pos += sprintf(&buffer[buf_pos], "User: %ld \tPID:%ld \tCPU Time: %d\n", (long)task->user->uid, (long)task->pid, 10);
     	// buf_pos += sprintf(&buffer[buf_pos], "Foobar\n");
     }
 
