@@ -233,18 +233,30 @@ static inline unsigned int task_timeslice(struct task_struct *p)
 
 	struct user_struct* current_user;
 	unsigned int timeslice;
+
+	// the atomic_t value of the number of processes the user is running
 	atomic_t processes;	
+
+	// the underlying volatile int for the atomic_t
+	int num_process;
 
 	current_user = p->user;
 	processes = current_user->processes;
+	num_process = atomic_read(&processes);
+
+	// We shouldn't need to worry about division by 0, because we're getting current_user
+	// from the current task, thus it is guaranteed that the current_user always has
+	// atleast one task. However, we'll play it safe anyways.
+	if (!num_process) 
+		num_process = 1;
+	
 
 	// we reserve (TIMESLICE_USER_FACTOR * DEF_TIMESLICE) for each user. 
 	// So, if a user has x processes running, each of
 	// them get ((TIMESLICE_USER_FACTOR * DEF_TIMESLICE) / x) milliseconds
-	// We don't need to worry about division by 0, because we're getting current_user
-	// from the current task, thus it is guaranteed that the current_user always has
-	// atleast one task	
-	timeslice = (unsigned int)(USER_DEF_TIMESLICE / atomic_read(&processes));
+	// timeslice = (unsigned int)(USER_DEF_TIMESLICE / atomic_read(&processes));
+	
+	timeslice = (unsigned int)(USER_DEF_TIMESLICE / num_process);
 	
 	return timeslice;
 }
