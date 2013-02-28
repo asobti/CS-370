@@ -17,4 +17,4 @@ Modified kernel according to *Project 1: Booting your custom kernel*.
 Modified kernel according to *Project 2: System calls and processes*.
 
 [**p4**](https://github.com/xbonez/CS-370/tree/P4)  
-Modified kernel according to *Project 2: Fair Share Scheduling*.
+Modified kernel according to *Project 4: Fair Share Scheduling*.
