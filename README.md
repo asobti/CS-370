@@ -23,4 +23,4 @@ This was an interesting, and moderately challenging assignment. It really put ou
 
 For this assignment, we modified the task_timeslice() function in kernel/sched.c file. We completely ignored the priority aspect of scheduling. In our implementation, allocation of timeslice entirely depends on the numer of users and number of processes per user.
 
-The timeslice is calculated using ((TIMESLICE_USER_FACTOR * DEF_TIMESLICE) / USER_PROCESSES) where TIMESLICE_USER_FACTOR is 5 miliseconds.  We were not woried about division by 0, because we're getting current_user from the current task, thus it is guaranteed that the current_user always has atleast one process. We got the number of processes per user by using atomic_read().
+The timeslice is calculated using ((TIMESLICE_USER_FACTOR * DEF_TIMESLICE) / USER_PROCESSES) where TIMESLICE_USER_FACTOR is 5 miliseconds.  We were not worried about division by 0, because we're getting current_user from the current task, thus it is guaranteed that the current_user always has atleast one process. We got the number of processes per user by using atomic_read().
