@@ -1,0 +1,880 @@
+Making Kernel
+  HOSTCC  scripts/basic/fixdep
+  HOSTCC  scripts/basic/docproc
+  HOSTCC  scripts/kconfig/conf.o
+  HOSTCC  scripts/kconfig/kxgettext.o
+  SHIPPED scripts/kconfig/zconf.tab.c
+  SHIPPED scripts/kconfig/lex.zconf.c
+  SHIPPED scripts/kconfig/zconf.hash.c
+  HOSTCC  scripts/kconfig/zconf.tab.o
+  HOSTLD  scripts/kconfig/conf
+scripts/kconfig/conf -o arch/x86_64/Kconfig
+*
+* Linux Kernel Configuration
+*
+*
+* Code maturity level options
+*
+Prompt for development and/or incomplete code/drivers (EXPERIMENTAL) [N/y/?] n
+*
+* General setup
+*
+Local version - append to kernel release (LOCALVERSION) [] 
+Automatically append version information to the version string (LOCALVERSION_AUTO) [N/y/?] n
+Support for paging of anonymous memory (swap) (SWAP) [Y/n/?] y
+System V IPC (SYSVIPC) [Y/n/?] y
+  IPC Namespaces (IPC_NS) [N/y/?] n
+BSD Process Accounting (BSD_PROCESS_ACCT) [N/y/?] n
+Export task/process statistics through netlink (EXPERIMENTAL) (TASKSTATS) [N/y/?] n
+UTS Namespaces (UTS_NS) [N/y/?] n
+Auditing support (AUDIT) [N/y/?] n
+Kernel .config support (IKCONFIG) [N/m/y/?] n
+Kernel log buffer size (16 => 64KB, 17 => 128KB) (LOG_BUF_SHIFT) [17] 17
+Create deprecated sysfs files (SYSFS_DEPRECATED) [N/y/?] n
+Kernel->user space relay support (formerly relayfs) (RELAY) [N/y/?] n
+Initial RAM filesystem and RAM disk (initramfs/initrd) support (BLK_DEV_INITRD) [Y/n/?] y
+  Initramfs source file(s) (INITRAMFS_SOURCE) [] 
+*
+* Configure standard kernel features (for small systems)
+*
+Configure standard kernel features (for small systems) (EMBEDDED) [N/y/?] n
+  Load all symbols for debugging/ksymoops (KALLSYMS) [Y/?] (NEW) y
+    Include all symbols in kallsyms (KALLSYMS_ALL) [Y/?] y
+    Do an extra kallsyms pass (KALLSYMS_EXTRA_PASS) [N/y/?] n
+Choose SLAB allocator
+  1. SLAB (SLAB)
+> 2. SLUB (Unqueued Allocator) (SLUB)
+choice[1-2?]: 2
+*
+* Loadable module support
+*
+Enable loadable module support (MODULES) [Y/n/?] y
+  Module unloading (MODULE_UNLOAD) [Y/n/?] y
+  Module versioning support (MODVERSIONS) [N/y/?] n
+  Source checksum for all modules (MODULE_SRCVERSION_ALL) [N/y/?] n
+  Automatic kernel module loading (KMOD) [Y/n/?] y
+*
+* Block layer
+*
+Enable the block layer (BLOCK) [Y/?] (NEW) y
+  Support for tracing block io actions (BLK_DEV_IO_TRACE) [N/y/?] n
+  *
+  * IO Schedulers
+  *
+  Anticipatory I/O scheduler (IOSCHED_AS) [N/m/y/?] n
+  Deadline I/O scheduler (IOSCHED_DEADLINE) [N/m/y/?] n
+  CFQ I/O scheduler (IOSCHED_CFQ) [N/m/y/?] n
+  Default I/O scheduler
+  > 1. No-op (DEFAULT_NOOP)
+  choice[1]: 1
+*
+* Processor type and features
+*
+Subarchitecture Type
+> 1. PC-compatible (X86_PC)
+  2. Support for ScaleMP vSMP (X86_VSMP)
+choice[1-2]: 1
+Processor family
+  1. AMD-Opteron/Athlon64 (MK8)
+  2. Intel P4 / older Netburst based Xeon (MPSC)
+  3. Intel Core2 / newer Xeon (MCORE2)
+> 4. Generic-x86-64 (GENERIC_CPU)
+choice[1-4]: 4
+/dev/cpu/microcode - Intel CPU microcode support (MICROCODE) [N/m/y/?] n
+/dev/cpu/*/msr - Model-specific register support (X86_MSR) [N/m/y/?] n
+/dev/cpu/*/cpuid - CPU information support (X86_CPUID) [N/m/y/?] n
+MTRR (Memory Type Range Register) support (MTRR) [N/y/?] n
+Symmetric multi-processing support (SMP) [N/y/?] n
+Preemption Model
+> 1. No Forced Preemption (Server) (PREEMPT_NONE)
+  2. Voluntary Kernel Preemption (Desktop) (PREEMPT_VOLUNTARY)
+  3. Preemptible Kernel (Low-Latency Desktop) (PREEMPT)
+choice[1-3]: 1
+Machine check support (X86_MCE) [Y/?] (NEW) y
+  Intel MCE features (X86_MCE_INTEL) [Y/n/?] y
+  AMD MCE features (X86_MCE_AMD) [Y/n/?] y
+kexec system call (KEXEC) [N/y/?] n
+Enable seccomp to safely compute untrusted bytecode (SECCOMP) [N/y/?] n
+Timer frequency
+  1. 100 HZ (HZ_100)
+> 2. 250 HZ (HZ_250)
+  3. 300 HZ (HZ_300)
+  4. 1000 HZ (HZ_1000)
+choice[1-4?]: 2
+*
+* Power management options
+*
+Power Management support (PM) [Y/n/?] y
+  Legacy Power Management API (DEPRECATED) (PM_LEGACY) [N/y/?] n
+  Power Management Debug Support (PM_DEBUG) [N/y/?] n
+  Driver model /sys/devices/.../power/state files (DEPRECATED) (PM_SYSFS_DEPRECATED) [N/y/?] n
+  Software Suspend (Hibernation) (SOFTWARE_SUSPEND) [N/y/?] n
+  *
+  * ACPI (Advanced Configuration and Power Interface) Support
+  *
+  ACPI Support (ACPI) [Y/n/?] y
+    Sleep States (ACPI_SLEEP) [Y/n/?] y
+      /proc/acpi/sleep (deprecated) (ACPI_SLEEP_PROC_SLEEP) [N/y/?] n
+    Procfs interface (deprecated) (ACPI_PROCFS) [Y/n/?] y
+    AC Adapter (ACPI_AC) [Y/n/m/?] y
+    Battery (ACPI_BATTERY) [Y/n/m/?] y
+    Button (ACPI_BUTTON) [Y/n/m/?] y
+    Fan (ACPI_FAN) [Y/n/m/?] y
+    Processor (ACPI_PROCESSOR) [Y/n/m/?] y
+      Thermal Zone (ACPI_THERMAL) [Y/n/m/?] y
+    ASUS/Medion Laptop Extras (ACPI_ASUS) [N/m/y/?] n
+    Toshiba Laptop Extras (ACPI_TOSHIBA) [N/m/y/?] n
+    Debug Statements (ACPI_DEBUG) [N/y/?] n
+*
+* CPU Frequency scaling
+*
+CPU Frequency scaling (CPU_FREQ) [N/y/?] n
+*
+* Bus options (PCI etc.)
+*
+PCI support (PCI) [Y/n] y
+  Support mmconfig PCI config space access (PCI_MMCONFIG) [N/y] n
+  PCI Express support (PCIEPORTBUS) [N/y/?] n
+Message Signaled Interrupts (MSI and MSI-X) (PCI_MSI) [N/y/?] n
+PCI Debugging (PCI_DEBUG) [N/y/?] n
+Interrupts on hypertransport devices (HT_IRQ) [Y/n/?] y
+*
+* PCCARD (PCMCIA/CardBus) support
+*
+PCCard (PCMCIA/CardBus) support (PCCARD) [N/m/y/?] n
+*
+* Executable file formats / Emulations
+*
+Kernel support for ELF binaries (BINFMT_ELF) [Y/n/?] y
+Kernel support for MISC binaries (BINFMT_MISC) [N/m/y/?] n
+IA32 Emulation (IA32_EMULATION) [N/y/?] n
+*
+* Networking
+*
+Networking support (NET) [Y/n/?] y
+  *
+  * Networking options
+  *
+  Packet socket (PACKET) [Y/n/m/?] y
+    Packet socket: mmapped IO (PACKET_MMAP) [N/y/?] n
+  Unix domain sockets (UNIX) [Y/n/m/?] y
+  Transformation user configuration interface (XFRM_USER) [N/m/y/?] n
+  PF_KEY sockets (NET_KEY) [N/m/y/?] n
+  TCP/IP networking (INET) [Y/n/?] y
+    IP: multicasting (IP_MULTICAST) [N/y/?] n
+    IP: advanced router (IP_ADVANCED_ROUTER) [N/y/?] n
+    IP: kernel level autoconfiguration (IP_PNP) [Y/n/?] y
+      IP: DHCP support (IP_PNP_DHCP) [Y/n/?] y
+      IP: BOOTP support (IP_PNP_BOOTP) [N/y/?] n
+      IP: RARP support (IP_PNP_RARP) [N/y/?] n
+    IP: tunneling (NET_IPIP) [Y/n/m/?] y
+    IP: GRE tunnels over IP (NET_IPGRE) [N/m/y/?] n
+    IP: TCP syncookie support (disabled per default) (SYN_COOKIES) [N/y/?] n
+    IP: AH transformation (INET_AH) [N/m/y/?] n
+    IP: ESP transformation (INET_ESP) [N/m/y/?] n
+    IP: IPComp transformation (INET_IPCOMP) [N/m/y/?] n
+    IP: IPsec transport mode (INET_XFRM_MODE_TRANSPORT) [Y/n/m/?] y
+    IP: IPsec tunnel mode (INET_XFRM_MODE_TUNNEL) [Y/n/m/?] y
+    IP: IPsec BEET mode (INET_XFRM_MODE_BEET) [Y/n/m/?] y
+    INET: socket monitoring interface (INET_DIAG) [Y/n/m/?] y
+    *
+    * TCP: advanced congestion control
+    *
+    TCP: advanced congestion control (TCP_CONG_ADVANCED) [Y/n/?] y
+      Binary Increase Congestion (BIC) control (TCP_CONG_BIC) [M/n/y/?] m
+      CUBIC TCP (TCP_CONG_CUBIC) [Y/n/m/?] y
+      TCP Westwood+ (TCP_CONG_WESTWOOD) [M/n/y/?] m
+      H-TCP (TCP_CONG_HTCP) [M/n/y/?] m
+      Default TCP congestion control
+      > 1. Cubic (DEFAULT_CUBIC)
+        2. Reno (DEFAULT_RENO)
+      choice[1-2?]: 1
+    The IPv6 protocol (IPV6) [N/m/y/?] n
+  Security Marking (NETWORK_SECMARK) [N/y/?] n
+  *
+  * Network packet filtering framework (Netfilter)
+  *
+  Network packet filtering framework (Netfilter) (NETFILTER) [N/y/?] n
+  802.1d Ethernet Bridging (BRIDGE) [N/m/y/?] n
+  802.1Q VLAN Support (VLAN_8021Q) [N/m/y/?] n
+  DECnet Support (DECNET) [N/m/y/?] n
+  ANSI/IEEE 802.2 LLC type 2 Support (LLC2) [N/m/y/?] n
+  The IPX protocol (IPX) [N/m/y/?] n
+  Appletalk protocol support (ATALK) [N/m/y/?] n
+  *
+  * QoS and/or fair queueing
+  *
+  QoS and/or fair queueing (NET_SCHED) [N/y/?] n
+  *
+  * Network testing
+  *
+  Packet Generator (USE WITH CAUTION) (NET_PKTGEN) [N/m/y/?] n
+  *
+  * Amateur Radio support
+  *
+  Amateur Radio support (HAMRADIO) [N/y/?] n
+  *
+  * IrDA (infrared) subsystem support
+  *
+  IrDA (infrared) subsystem support (IRDA) [N/m/y/?] n
+  *
+  * Bluetooth subsystem support
+  *
+  Bluetooth subsystem support (BT) [N/m/y/?] n
+  *
+  * Wireless
+  *
+  Improved wireless configuration API (CFG80211) [N/m/y] n
+  Wireless extensions (WIRELESS_EXT) [N/y/?] n
+  Generic IEEE 802.11 Networking Stack (IEEE80211) [N/m/y/?] n
+  *
+  * RF switch subsystem support
+  *
+  RF switch subsystem support (RFKILL) [N/m/y/?] n
+*
+* Device Drivers
+*
+*
+* Generic Driver Options
+*
+Prevent firmware from being built (PREVENT_FIRMWARE_BUILD) [N/y/?] n
+Userspace firmware loading support (FW_LOADER) [Y/n/m/?] y
+Driver Core verbose debug messages (DEBUG_DRIVER) [N/y/?] n
+Managed device resources verbose debug messages (DEBUG_DEVRES) [N/y/?] n
+*
+* Connector - unified userspace <-> kernelspace linker
+*
+Connector - unified userspace <-> kernelspace linker (CONNECTOR) [N/m/y/?] n
+*
+* Memory Technology Device (MTD) support
+*
+Memory Technology Device (MTD) support (MTD) [N/m/y/?] n
+*
+* Parallel port support
+*
+Parallel port support (PARPORT) [N/m/y/?] n
+*
+* Plug and Play support
+*
+Plug and Play support (PNP) [Y/?] y
+  PnP Debug Messages (PNP_DEBUG) [N/y/?] n
+  *
+  * Protocols
+  *
+*
+* Block devices
+*
+Normal floppy disk support (BLK_DEV_FD) [N/m/y/?] n
+Compaq SMART2 support (BLK_CPQ_DA) [N/m/y/?] n
+Compaq Smart Array 5xxx support (BLK_CPQ_CISS_DA) [N/m/y/?] n
+Mylex DAC960/DAC1100 PCI RAID Controller support (BLK_DEV_DAC960) [N/m/y/?] n
+Loopback device support (BLK_DEV_LOOP) [N/m/y/?] n
+Network block device support (BLK_DEV_NBD) [N/m/y/?] n
+Promise SATA SX8 support (BLK_DEV_SX8) [N/m/y/?] n
+RAM disk support (BLK_DEV_RAM) [N/m/y/?] n
+Packet writing on CD/DVD media (CDROM_PKTCDVD) [N/m/y/?] n
+ATA over Ethernet support (ATA_OVER_ETH) [N/m/y/?] n
+*
+* Misc devices
+*
+Sensable PHANToM (PHANTOM) [N/m/y/?] n
+SGI IOC4 Base IO support (SGI_IOC4) [N/m/y/?] n
+Sony Laptop Extras (SONY_LAPTOP) [N/m/y/?] n
+ThinkPad ACPI Laptop Extras (THINKPAD_ACPI) [N/m/y/?] n
+*
+* ATA/ATAPI/MFM/RLL support
+*
+ATA/ATAPI/MFM/RLL support (IDE) [Y/n/m/?] y
+  Enhanced IDE/MFM/RLL disk/cdrom/tape/floppy support (BLK_DEV_IDE) [Y/n/m/?] y
+    *
+    * Please see Documentation/ide.txt for help/info on IDE drives
+    *
+    Support for SATA (deprecated; conflicts with libata SATA driver) (BLK_DEV_IDE_SATA) [N/y/?] n
+    Use old disk-only driver on primary interface (BLK_DEV_HD_IDE) [N/y/?] n
+    Include IDE/ATA-2 DISK support (BLK_DEV_IDEDISK) [Y/n/m/?] y
+    Use multi-mode by default (IDEDISK_MULTI_MODE) [N/y/?] n
+    Include IDE/ATAPI CDROM support (BLK_DEV_IDECD) [N/m/y/?] n
+    Include IDE/ATAPI FLOPPY support (BLK_DEV_IDEFLOPPY) [N/m/y/?] n
+    SCSI emulation support (BLK_DEV_IDESCSI) [N/m/y/?] n
+    IDE ACPI support (BLK_DEV_IDEACPI) [N/y/?] n
+    IDE Taskfile Access (IDE_TASK_IOCTL) [N/y/?] n
+    legacy /proc/ide/ support (IDE_PROC_FS) [Y/n/?] y
+    *
+    * IDE chipset support/bugfixes
+    *
+    generic/default IDE chipset support (IDE_GENERIC) [Y/n/m/?] y
+    CMD640 chipset bugfix/support (BLK_DEV_CMD640) [N/y/?] n
+    PNP EIDE support (BLK_DEV_IDEPNP) [N/y/?] n
+    PCI IDE chipset support (BLK_DEV_IDEPCI) [N/y/?] n
+*
+* SCSI device support
+*
+RAID Transport Class (RAID_ATTRS) [N/m/y/?] n
+SCSI device support (SCSI) [Y/?] y
+legacy /proc/scsi/ support (SCSI_PROC_FS) [Y/n/?] y
+*
+* SCSI support type (disk, tape, CD-ROM)
+*
+SCSI disk support (BLK_DEV_SD) [Y/n/m/?] y
+SCSI tape support (CHR_DEV_ST) [N/m/y/?] n
+SCSI OnStream SC-x0 tape support (CHR_DEV_OSST) [N/m/y/?] n
+SCSI CDROM support (BLK_DEV_SR) [N/m/y/?] n
+SCSI generic support (CHR_DEV_SG) [N/m/y/?] n
+SCSI media changer support (CHR_DEV_SCH) [N/m/y/?] n
+*
+* Some SCSI devices (e.g. CD jukebox) support multiple LUNs
+*
+Probe all LUNs on each SCSI device (SCSI_MULTI_LUN) [N/y/?] n
+Verbose SCSI error reporting (kernel size +=12K) (SCSI_CONSTANTS) [N/y/?] n
+SCSI logging facility (SCSI_LOGGING) [N/y/?] n
+Asynchronous SCSI scanning (SCSI_SCAN_ASYNC) [N/y/?] n
+*
+* SCSI Transports
+*
+Parallel SCSI (SPI) Transport Attributes (SCSI_SPI_ATTRS) [N/m/y/?] n
+FiberChannel Transport Attributes (SCSI_FC_ATTRS) [N/m/y/?] n
+iSCSI Transport Attributes (SCSI_ISCSI_ATTRS) [N/m/y/?] n
+SAS Transport Attributes (SCSI_SAS_ATTRS) [N/m/y/?] n
+SAS Domain Transport Attributes (SCSI_SAS_LIBSAS) [N/m/y/?] n
+*
+* SCSI low-level drivers
+*
+iSCSI Initiator over TCP/IP (ISCSI_TCP) [N/m/y/?] n
+3ware 5/6/7/8xxx ATA-RAID support (BLK_DEV_3W_XXXX_RAID) [N/m/y/?] n
+3ware 9xxx SATA-RAID support (SCSI_3W_9XXX) [N/m/y/?] n
+ACARD SCSI support (SCSI_ACARD) [N/m/y/?] n
+Adaptec AACRAID support (SCSI_AACRAID) [N/m/y/?] n
+Adaptec AIC7xxx Fast -> U160 support (New Driver) (SCSI_AIC7XXX) [N/m/y/?] n
+Adaptec AIC7xxx support (old driver) (SCSI_AIC7XXX_OLD) [N/m/y/?] n
+Adaptec AIC79xx U320 support (SCSI_AIC79XX) [N/m/y/?] n
+Adaptec AIC94xx SAS/SATA support (SCSI_AIC94XX) [N/m/y/?] n
+ARECA ARC11X0[PCI-X]/ARC12X0[PCI-EXPRESS] SATA-RAID support (SCSI_ARCMSR) [N/m/y/?] n
+LSI Logic New Generation RAID Device Drivers (MEGARAID_NEWGEN) [N/y/?] n
+LSI Logic Legacy MegaRAID Driver (MEGARAID_LEGACY) [N/m/y/?] n
+LSI Logic MegaRAID SAS RAID Module (MEGARAID_SAS) [N/m/y/?] n
+HighPoint RocketRAID 3xxx Controller support (SCSI_HPTIOP) [N/m/y/?] n
+BusLogic SCSI support (SCSI_BUSLOGIC) [N/m/y/?] n
+DMX3191D SCSI support (SCSI_DMX3191D) [N/m/y/?] n
+EATA ISA/EISA/PCI (DPT and generic EATA/DMA-compliant boards) support (SCSI_EATA) [N/m/y/?] n
+Future Domain 16xx SCSI/AHA-2920A support (SCSI_FUTURE_DOMAIN) [N/m/y/?] n
+Intel/ICP (former GDT SCSI Disk Array) RAID Controller support (SCSI_GDTH) [N/m/y/?] n
+IBM ServeRAID support (SCSI_IPS) [N/m/y/?] n
+Initio 9100U(W) support (SCSI_INITIO) [N/m/y/?] n
+Initio INI-A100U2W support (SCSI_INIA100) [N/m/y/?] n
+Promise SuperTrak EX Series support (SCSI_STEX) [N/m/y/?] n
+SYM53C8XX Version 2 SCSI support (SCSI_SYM53C8XX_2) [N/m/y/?] n
+IBM Power Linux RAID adapter support (SCSI_IPR) [N/m/y/?] n
+Qlogic QLA 1240/1x80/1x160 SCSI support (SCSI_QLOGIC_1280) [N/m/y/?] n
+QLogic QLA2XXX Fibre Channel Support (SCSI_QLA_FC) [N/m/y/?] n
+QLogic ISP4XXX host adapter family support (SCSI_QLA_ISCSI) [N/m/y/?] n
+Emulex LightPulse Fibre Channel Support (SCSI_LPFC) [N/m/y/?] n
+Tekram DC390(T) and Am53/79C974 SCSI support (SCSI_DC390T) [N/m/y/?] n
+SCSI debugging host simulator (SCSI_DEBUG) [N/m/y/?] n
+SCSI RDMA Protocol helper library (SCSI_SRP) [N/m/y/?] n
+*
+* Serial ATA (prod) and Parallel ATA (experimental) drivers
+*
+Serial ATA (prod) and Parallel ATA (experimental) drivers (ATA) [Y/n/m/?] y
+  AHCI SATA support (SATA_AHCI) [N/m/y/?] n
+  ServerWorks Frodo / Apple K2 SATA support (SATA_SVW) [N/m/y/?] n
+  Intel ESB, ICH, PIIX3, PIIX4 PATA/SATA support (ATA_PIIX) [N/m/y/?] n
+  NVIDIA SATA support (SATA_NV) [N/m/y/?] n
+  Pacific Digital ADMA support (PDC_ADMA) [N/m/y/?] n
+  Pacific Digital SATA QStor support (SATA_QSTOR) [N/m/y/?] n
+  Promise SATA TX2/TX4 support (SATA_PROMISE) [N/m/y/?] n
+  Silicon Image SATA support (SATA_SIL) [N/m/y/?] n
+  Silicon Image 3124/3132 SATA support (SATA_SIL24) [N/m/y/?] n
+  SiS 964/965/966/180 SATA support (SATA_SIS) [N/m/y/?] n
+  ULi Electronics SATA support (SATA_ULI) [N/m/y/?] n
+  VIA SATA support (SATA_VIA) [N/m/y/?] n
+  VITESSE VSC-7174 / INTEL 31244 SATA support (SATA_VITESSE) [N/m/y/?] n
+  AMD/NVidia PATA support (PATA_AMD) [N/m/y/?] n
+  CS5510/5520 PATA support (PATA_CS5520) [N/m/y/?] n
+  EFAR SLC90E66 support (PATA_EFAR) [N/m/y/?] n
+  Generic ATA support (ATA_GENERIC) [N/m/y/?] n
+  HPT 343/363 PATA support (Experimental) (PATA_HPT3X3) [N/m/y/?] n
+  IT8211/2 PATA support (PATA_IT821X) [N/m/y/?] n
+  JMicron PATA support (PATA_JMICRON) [N/m/y/?] n
+  Compaq Triflex PATA support (PATA_TRIFLEX) [N/m/y/?] n
+  Marvell PATA support via legacy mode (PATA_MARVELL) [N/m/y/?] n
+  Intel PATA MPIIX support (PATA_MPIIX) [N/m/y/?] n
+  Intel PATA old PIIX support (PATA_OLDPIIX) [N/m/y/?] n
+  NETCELL Revolution RAID support (PATA_NETCELL) [N/m/y/?] n
+  PC Tech RZ1000 PATA support (PATA_RZ1000) [N/m/y/?] n
+  SERVERWORKS OSB4/CSB5/CSB6/HT1000 PATA support (PATA_SERVERWORKS) [N/m/y/?] n
+  Promise PATA 2027x support (PATA_PDC2027X) [N/m/y/?] n
+  CMD / Silicon Image 680 PATA support (PATA_SIL680) [N/m/y/?] n
+  VIA PATA support (PATA_VIA) [N/m/y/?] n
+  Winbond SL82C105 PATA support (PATA_WINBOND) [N/m/y/?] n
+*
+* Multi-device support (RAID and LVM)
+*
+Multiple devices driver support (RAID and LVM) (MD) [N/y/?] n
+*
+* Fusion MPT device support
+*
+Fusion MPT ScsiHost drivers for SPI (FUSION_SPI) [N/m/y/?] n
+Fusion MPT ScsiHost drivers for FC (FUSION_FC) [N/m/y/?] n
+Fusion MPT ScsiHost drivers for SAS (FUSION_SAS) [N/m/y/?] n
+*
+* IEEE 1394 (FireWire) support
+*
+*
+* An alternative FireWire stack is available with EXPERIMENTAL=y
+*
+IEEE 1394 (FireWire) support (IEEE1394) [N/m/y/?] n
+*
+* I2O device support
+*
+I2O support (I2O) [N/m/y/?] n
+*
+* Macintosh device drivers
+*
+Macintosh device drivers (MACINTOSH_DRIVERS) [N/y] n
+*
+* Network device support
+*
+Network device support (NETDEVICES) [Y/n/?] y
+  Dummy net driver support (DUMMY) [Y/n/m/?] y
+  Bonding driver support (BONDING) [Y/n/m/?] y
+  EQL (serial line load balancing) support (EQUALIZER) [Y/n/m/?] y
+  Universal TUN/TAP device driver support (TUN) [Y/n/m/?] y
+  General Instruments Surfboard 1000 (NET_SB1000) [N/m/y/?] n
+  *
+  * ARCnet support
+  *
+  ARCnet support (ARCNET) [Y/n/m/?] y
+    Enable standard ARCNet packet format (RFC 1201) (ARCNET_1201) [N/m/y/?] n
+    Enable old ARCNet packet format (RFC 1051) (ARCNET_1051) [N/m/y/?] n
+    Enable raw mode packet interface (ARCNET_RAW) [N/m/y/?] n
+    Enable CAP mode packet interface (ARCNET_CAP) [N/m/y/?] n
+    ARCnet COM90xx (normal) chipset driver (ARCNET_COM90xx) [N/m/y/?] n
+    ARCnet COM90xx (IO mapped) chipset driver (ARCNET_COM90xxIO) [N/m/y/?] n
+    ARCnet COM90xx (RIM I) chipset driver (ARCNET_RIM_I) [N/m/y/?] n
+    ARCnet COM20020 chipset driver (ARCNET_COM20020) [N/m/y/?] n
+  *
+  * PHY Device support and infrastructure
+  *
+  PHY Device support and infrastructure (PHYLIB) [Y/n/m/?] y
+    *
+    * MII PHY device drivers
+    *
+    Drivers for Marvell PHYs (MARVELL_PHY) [N/m/y/?] n
+    Drivers for Davicom PHYs (DAVICOM_PHY) [N/m/y/?] n
+    Drivers for Quality Semiconductor PHYs (QSEMI_PHY) [N/m/y/?] n
+    Drivers for the Intel LXT PHYs (LXT_PHY) [N/m/y/?] n
+    Drivers for the Cicada PHYs (CICADA_PHY) [N/m/y/?] n
+    Drivers for the Vitesse PHYs (VITESSE_PHY) [N/m/y/?] n
+    Drivers for SMSC PHYs (SMSC_PHY) [N/m/y/?] n
+    Drivers for Broadcom PHYs (BROADCOM_PHY) [N/m/y/?] n
+    Drivers for PHY emulation on fixed speed/link (FIXED_PHY) [N/m/y/?] n
+  *
+  * Ethernet (10 or 100Mbit)
+  *
+  Ethernet (10 or 100Mbit) (NET_ETHERNET) [Y/n/?] y
+    Generic Media Independent Interface device support (MII) [Y/?] y
+    Sun Happy Meal 10/100baseT support (HAPPYMEAL) [Y/n/m/?] y
+    Sun GEM support (SUNGEM) [Y/n/m/?] y
+    Sun Cassini support (CASSINI) [Y/n/m/?] y
+    3COM cards (NET_VENDOR_3COM) [Y/n/?] y
+      3c590/3c900 series (592/595/597) "Vortex/Boomerang" support (VORTEX) [Y/n/m/?] y
+      3cr990 series "Typhoon" support (TYPHOON) [Y/n/m/?] y
+  *
+  * Tulip family network device support
+  *
+  "Tulip" family network device support (NET_TULIP) [N/y/?] n
+  HP 10/100VG PCLAN (ISA, EISA, PCI) support (HP100) [Y/n/m/?] y
+  EISA, VLB, PCI and on board controllers (NET_PCI) [Y/n/?] y
+    AMD PCnet32 PCI support (PCNET32) [Y/n/m/?] y
+      Use RX polling (NAPI) (PCNET32_NAPI) [Y/n/?] y
+    AMD 8111 (new PCI lance) support (AMD8111_ETH) [Y/n/m/?] y
+      Enable NAPI support (AMD8111E_NAPI) [Y/n/?] y
+    Adaptec Starfire/DuraLAN support (ADAPTEC_STARFIRE) [Y/n/m/?] y
+    Broadcom 4400 ethernet support (B44) [Y/n/m/?] y
+    nForce Ethernet support (FORCEDETH) [Y/n/m/?] y
+    Digi Intl. RightSwitch SE-X support (DGRS) [Y/n/m/?] y
+    EtherExpressPro/100 support (eepro100, original Becker driver) (EEPRO100) [Y/n/m/?] y
+    Intel(R) PRO/100+ support (E100) [Y/n/m/?] y
+    Myson MTD-8xx PCI Ethernet support (FEALNX) [Y/n/m/?] y
+    National Semiconductor DP8381x series PCI Ethernet support (NATSEMI) [Y/n/m/?] y
+    PCI NE2000 and clones support (see help) (NE2K_PCI) [Y/n/m/?] y
+    RealTek RTL-8129/8130/8139 PCI Fast Ethernet Adapter support (8139TOO) [Y/n/m/?] y
+      Use PIO instead of MMIO (8139TOO_PIO) [Y/n/?] y
+      Support for uncommon RTL-8139 rev. K (automatic channel equalization) (8139TOO_TUNE_TWISTER) [Y/n/?] y
+      Support for older RTL-8129/8130 boards (8139TOO_8129) [Y/n/?] y
+      Use older RX-reset method (8139_OLD_RX_RESET) [Y/n/?] y
+    SiS 900/7016 PCI Fast Ethernet Adapter support (SIS900) [Y/n/m/?] y
+    SMC EtherPower II (EPIC100) [Y/n/m/?] y
+    Sundance Alta support (SUNDANCE) [Y/n/m/?] y
+      Use MMIO instead of PIO (SUNDANCE_MMIO) [Y/n/?] y
+    VIA Rhine support (VIA_RHINE) [Y/n/m/?] y
+      Use MMIO instead of PIO (VIA_RHINE_MMIO) [Y/n/?] y
+      Use Rx Polling (NAPI) (VIA_RHINE_NAPI) [Y/n/?] y
+  *
+  * Ethernet (1000 Mbit)
+  *
+  Ethernet (1000 Mbit) (NETDEV_1000) [Y/n] y
+    Alteon AceNIC/3Com 3C985/NetGear GA620 Gigabit support (ACENIC) [N/m/y/?] n
+    D-Link DL2000-based Gigabit Ethernet support (DL2K) [N/m/y/?] n
+    Intel(R) PRO/1000 Gigabit Ethernet support (E1000) [Y/n/m/?] y
+      Use Rx Polling (NAPI) (E1000_NAPI) [N/y/?] n
+      Disable Packet Split for PCI express adapters (E1000_DISABLE_PACKET_SPLIT) [N/y/?] n
+    National Semiconductor DP83820 support (NS83820) [N/m/y/?] n
+    Packet Engines Hamachi GNIC-II support (HAMACHI) [N/m/y/?] n
+    Realtek 8169 gigabit ethernet support (R8169) [N/m/y/?] n
+    SiS190/SiS191 gigabit ethernet support (SIS190) [N/m/y/?] n
+    New SysKonnect GigaEthernet support (SKGE) [N/m/y/?] n
+    SysKonnect Yukon2 support (EXPERIMENTAL) (SKY2) [N/m/y/?] n
+    Marvell Yukon Chipset / SysKonnect SK-98xx Support (DEPRECATED) (SK98LIN) [N/m/y/?] n
+    VIA Velocity support (VIA_VELOCITY) [N/m/y/?] n
+    Broadcom Tigon3 support (TIGON3) [N/m/y/?] n
+    Broadcom NetXtremeII support (BNX2) [N/m/y/?] n
+    QLogic QLA3XXX Network Driver Support (QLA3XXX) [N/m/y/?] n
+  *
+  * Ethernet (10000 Mbit)
+  *
+  Ethernet (10000 Mbit) (NETDEV_10000) [Y/n] y
+    Chelsio 10Gb Ethernet support (CHELSIO_T1) [N/m/y/?] n
+    Chelsio Communications T3 10Gb Ethernet support (CHELSIO_T3) [N/m/y/?] n
+    Intel(R) PRO/10GbE support (IXGB) [N/m/y/?] n
+    S2IO 10Gbe XFrame NIC (S2IO) [N/m/y/?] n
+    Myricom Myri-10G Ethernet support (MYRI10GE) [N/m/y/?] n
+    NetXen Multi port (1/10) Gigabit Ethernet NIC (NETXEN_NIC) [N/m/y/?] n
+  *
+  * Token Ring driver support
+  *
+  Token Ring driver support (TR) [N/y/?] n
+  *
+  * Wireless LAN
+  *
+  Wireless LAN (pre-802.11) (WLAN_PRE80211) [N/y/?] n
+  Wireless LAN (IEEE 802.11) (WLAN_80211) [N/y/?] n
+  *
+  * Wan interfaces support
+  *
+  Wan interfaces support (WAN) [N/y/?] n
+  FDDI driver support (FDDI) [N/y/?] n
+  PPP (point-to-point protocol) support (PPP) [N/m/y/?] n
+  SLIP (serial line) support (SLIP) [N/m/y/?] n
+  Fibre Channel driver support (NET_FC) [N/y/?] n
+*
+* ISDN subsystem
+*
+ISDN support (ISDN) [N/m/y/?] n
+*
+* Telephony Support
+*
+Linux telephony support (PHONE) [N/m/y/?] n
+*
+* Input device support
+*
+Generic input layer (needed for keyboard, mouse, ...) (INPUT) [Y/?] (NEW) y
+  Support for memoryless force-feedback devices (INPUT_FF_MEMLESS) [N/m/y/?] n
+  Polled input device skeleton (INPUT_POLLDEV) [N/m/y/?] n
+  *
+  * Userland interfaces
+  *
+  Mouse interface (INPUT_MOUSEDEV) [Y/?] (NEW) y
+    Provide legacy /dev/psaux device (INPUT_MOUSEDEV_PSAUX) [N/y/?] n
+    Horizontal screen resolution (INPUT_MOUSEDEV_SCREEN_X) [1024] 1024
+    Vertical screen resolution (INPUT_MOUSEDEV_SCREEN_Y) [768] 768
+  Joystick interface (INPUT_JOYDEV) [N/m/y/?] n
+  Touchscreen interface (INPUT_TSDEV) [N/m/y/?] n
+  Event interface (INPUT_EVDEV) [N/m/y/?] n
+  Event debugging (INPUT_EVBUG) [N/m/y/?] n
+  *
+  * Input Device Drivers
+  *
+  *
+  * Keyboards
+  *
+  Keyboards (INPUT_KEYBOARD) [Y/?] (NEW) y
+    Sun Type 4 and Type 5 keyboard (KEYBOARD_SUNKBD) [N/m/y/?] n
+    DECstation/VAXstation LK201/LK401 keyboard (KEYBOARD_LKKBD) [N/m/y/?] n
+    XT keyboard (KEYBOARD_XTKBD) [N/m/y/?] n
+    Newton keyboard (KEYBOARD_NEWTON) [N/m/y/?] n
+    Stowaway keyboard (KEYBOARD_STOWAWAY) [N/m/y/?] n
+  *
+  * Mice
+  *
+  Mice (INPUT_MOUSE) [N/y/?] n
+  *
+  * Joysticks/Gamepads
+  *
+  Joysticks/Gamepads (INPUT_JOYSTICK) [N/y/?] n
+  *
+  * Tablets
+  *
+  Tablets (INPUT_TABLET) [N/y/?] n
+  *
+  * Touchscreens
+  *
+  Touchscreens (INPUT_TOUCHSCREEN) [N/y/?] n
+  *
+  * Miscellaneous devices
+  *
+  Miscellaneous devices (INPUT_MISC) [N/y/?] n
+*
+* Hardware I/O ports
+*
+Serial I/O support (SERIO) [Y/?] (NEW) y
+  Serial port line discipline (SERIO_SERPORT) [N/m/y/?] n
+  ct82c710 Aux port controller (SERIO_CT82C710) [N/m/y/?] n
+  PCI PS/2 keyboard and PS/2 mouse controller (SERIO_PCIPS2) [N/m/y/?] n
+  Raw access to serio ports (SERIO_RAW) [N/m/y/?] n
+Gameport support (GAMEPORT) [N/m/y/?] n
+*
+* Character devices
+*
+Virtual terminal (VT) [Y/?] (NEW) y
+  Support for binding and unbinding console drivers (VT_HW_CONSOLE_BINDING) [N/y/?] n
+Non-standard serial port support (SERIAL_NONSTANDARD) [N/y/?] n
+*
+* Serial drivers
+*
+8250/16550 and compatible serial support (SERIAL_8250) [N/m/y/?] n
+*
+* Non-8250 serial port support
+*
+Digi International NEO PCI Support (SERIAL_JSM) [N/m/y/?] n
+Legacy (BSD) PTY support (LEGACY_PTYS) [N/y/?] n
+*
+* IPMI
+*
+IPMI top-level message handler (IPMI_HANDLER) [N/m/y/?] n
+*
+* Watchdog Timer Support
+*
+Watchdog Timer Support (WATCHDOG) [N/y/?] n
+Hardware Random Number Generator Core support (HW_RANDOM) [N/m/y/?] n
+/dev/nvram support (NVRAM) [N/m/y/?] n
+Enhanced Real Time Clock Support (RTC) [N/m/y/?] n
+Generic /dev/rtc emulation (GEN_RTC) [N/m/y/?] n
+Siemens R3964 line discipline (R3964) [N/m/y/?] n
+Applicom intelligent fieldbus card support (APPLICOM) [N/m/y/?] n
+/dev/agpgart (AGP Support) (AGP) [Y/?] y
+  Intel 440LX/BX/GX, I8xx and E7x05 chipset support (AGP_INTEL) [N/m/y/?] n
+  SiS chipset support (AGP_SIS) [N/m/y/?] n
+  VIA chipset support (AGP_VIA) [N/m/y/?] n
+Direct Rendering Manager (XFree86 4.1.0 and higher DRI support) (DRM) [N/m/y/?] n
+ACP Modem (Mwave) support (MWAVE) [N/m/y/?] n
+NatSemi PC8736x GPIO Support (PC8736x_GPIO) [N/m/y/?] n
+RAW driver (/dev/raw/rawN) (OBSOLETE) (RAW_DRIVER) [N/m/y/?] n
+HPET - High Precision Event Timer (HPET) [N/y/?] n
+Hangcheck timer (HANGCHECK_TIMER) [N/m/y/?] n
+*
+* TPM devices
+*
+*
+* I2C support
+*
+I2C support (I2C) [N/m/y/?] n
+*
+* SPI support
+*
+SPI support (SPI) [N/y/?] n
+*
+* Dallas's 1-wire bus
+*
+Dallas's 1-wire support (W1) [N/m/y/?] n
+*
+* Hardware Monitoring support
+*
+Hardware Monitoring support (HWMON) [N/m/y/?] n
+*
+* Multifunction device drivers
+*
+Support for Silicon Motion SM501 (MFD_SM501) [N/m/y/?] n
+*
+* Multimedia devices
+*
+Video For Linux (VIDEO_DEV) [N/m/y/?] n
+DVB for Linux (DVB_CORE) [N/m/y/?] n
+DAB adapters (DAB) [N/y/?] n
+*
+* Graphics support
+*
+*
+* Backlight & LCD device support
+*
+Backlight & LCD device support (BACKLIGHT_LCD_SUPPORT) [N/y/?] n
+*
+* Display device support
+*
+Display panel/monitor support (DISPLAY_SUPPORT) [N/m/y/?] n
+Support for frame buffer devices (FB) [N/m/y/?] n
+*
+* Console display driver support
+*
+VGA text console (VGA_CONSOLE) [Y/?] (NEW) y
+  Enable Scrollback Buffer in System RAM (VGACON_SOFT_SCROLLBACK) [N/y/?] n
+  Video mode selection support (VIDEO_SELECT) [N/y/?] n
+*
+* Sound
+*
+Sound card support (SOUND) [N/m/y/?] n
+*
+* HID Devices
+*
+Generic HID support (HID) [Y/n/m/?] y
+  HID debugging support (HID_DEBUG) [N/y/?] n
+*
+* USB support
+*
+Support for Host-side USB (USB) [N/m/y/?] n
+*
+* NOTE: USB_STORAGE enables SCSI, and 'SCSI disk support'
+*
+*
+* USB Gadget Support
+*
+Support for USB Gadgets (USB_GADGET) [N/m/y/?] n
+*
+* MMC/SD card support
+*
+MMC/SD card support (MMC) [N/m/y/?] n
+*
+* LED devices
+*
+LED Support (NEW_LEDS) [N/y/?] n
+*
+* LED drivers
+*
+*
+* LED Triggers
+*
+*
+* InfiniBand support
+*
+InfiniBand support (INFINIBAND) [N/m/y/?] n
+*
+* EDAC - error detection and reporting (RAS) (EXPERIMENTAL)
+*
+*
+* Real Time Clock
+*
+*
+* DMA Engine support
+*
+Support for DMA engines (DMA_ENGINE) [N/y/?] n
+*
+* DMA Clients
+*
+*
+* DMA Devices
+*
+*
+* Virtualization
+*
+*
+* Firmware Drivers
+*
+BIOS Enhanced Disk Drive calls determine boot disk (EDD) [N/m/y/?] n
+BIOS update support for DELL systems via sysfs (DELL_RBU) [N/m/y/?] n
+Dell Systems Management Base Driver (DCDBAS) [N/m/y/?] n
+*
+* File systems
+*
+Second extended fs support (EXT2_FS) [Y/n/m/?] y
+  Ext2 extended attributes (EXT2_FS_XATTR) [N/y/?] n
+  Ext2 execute in place support (EXT2_FS_XIP) [N/y/?] n
+Ext3 journalling file system support (EXT3_FS) [Y/n/m/?] y
+  Ext3 extended attributes (EXT3_FS_XATTR) [Y/n/?] y
+    Ext3 POSIX Access Control Lists (EXT3_FS_POSIX_ACL) [N/y/?] n
+    Ext3 Security Labels (EXT3_FS_SECURITY) [N/y/?] n
+JBD (ext3) debugging support (JBD_DEBUG) [N/y/?] n
+Reiserfs support (REISERFS_FS) [N/m/y/?] n
+JFS filesystem support (JFS_FS) [N/m/y/?] n
+XFS filesystem support (XFS_FS) [N/m/y/?] n
+OCFS2 file system support (OCFS2_FS) [N/m/y/?] n
+Minix fs support (MINIX_FS) [N/m/y/?] n
+ROM file system support (ROMFS_FS) [N/m/y/?] n
+Inotify file change notification support (INOTIFY) [Y/n/?] y
+  Inotify support for userspace (INOTIFY_USER) [Y/n/?] y
+Quota support (QUOTA) [N/y/?] n
+Kernel automounter support (AUTOFS_FS) [M/n/y/?] m
+Kernel automounter version 4 support (also supports v3) (AUTOFS4_FS) [M/n/y/?] m
+Filesystem in Userspace support (FUSE_FS) [M/n/y/?] m
+*
+* CD-ROM/DVD Filesystems
+*
+ISO 9660 CDROM file system support (ISO9660_FS) [N/m/y/?] n
+UDF file system support (UDF_FS) [N/m/y/?] n
+*
+* DOS/FAT/NT Filesystems
+*
+MSDOS fs support (MSDOS_FS) [N/m/y/?] n
+VFAT (Windows-95) fs support (VFAT_FS) [N/m/y/?] n
+NTFS file system support (NTFS_FS) [N/m/y/?] n
+*
+* Pseudo filesystems
+*
+/proc file system support (PROC_FS) [Y/?] (NEW) y
+  /proc/kcore support (PROC_KCORE) [N/y] n
+Virtual memory file system support (former shm fs) (TMPFS) [Y/n/?] y
+  Tmpfs POSIX Access Control Lists (TMPFS_POSIX_ACL) [N/y/?] n
+HugeTLB file system support (HUGETLBFS) [N/y/?] n
+*
+* Miscellaneous filesystems
+*
+Apple Extended HFS file system support (HFSPLUS_FS) [N/m/y/?] n
+Compressed ROM file system support (cramfs) (CRAMFS) [N/m/y/?] n
+FreeVxFS file system support (VERITAS VxFS(TM) compatible) (VXFS_FS) [N/m/y/?] n
+OS/2 HPFS file system support (HPFS_FS) [N/m/y/?] n
+QNX4 file system support (read only) (QNX4FS_FS) [N/m/y/?] n
+System V/Xenix/V7/Coherent file system support (SYSV_FS) [N/m/y/?] n
+UFS file system support (read only) (UFS_FS) [N/m/y/?] n
+*
+* Network File Systems
+*
+NFS file system support (NFS_FS) [N/m/y/?] n
+NFS server support (NFSD) [N/m/y/?] n
+SMB file system support (to mount Windows shares etc.) (SMB_FS) [N/m/y/?] n
+CIFS support (advanced network filesystem for Samba, Window and other CIFS compliant servers) (CIFS) [N/m/y/?] n
+NCP file system support (to mount NetWare volumes) (NCP_FS) [N/m/y/?] n
+Coda file system support (advanced network fs) (CODA_FS) [N/m/y/?] n
+*
+* Partition Types
+*
+Advanced partition selection (PARTITION_ADVANCED) [N/y/?] n
+*
+* Native Language Support
+*
+Base native language support (NLS) [N/m/y/?] n
+*
+* Kernel hacking
+*
+Show timing information on printks (PRINTK_TIME) [Y/n/?] y
+Enable __must_check logic (ENABLE_MUST_CHECK) [Y/n/?] y
+Magic SysRq key (MAGIC_SYSRQ) [Y/n/?] y
+Enable unused/obsolete exported symbols (UNUSED_SYMBOLS) [Y/n/?] y
+Debug Filesystem (DEBUG_FS) [Y/n/?] y
+Run 'make headers_check' when building vmlinux (HEADERS_CHECK) [Y/n/?] y
+Kernel debugging (DEBUG_KERNEL) [Y/n/?] y
+  Debug shared IRQ handlers (DEBUG_SHIRQ) [Y/n/?] y
+  Detect Soft Lockups (DETECT_SOFTLOCKUP) [Y/n/?] y
+  Collect scheduler statistics (SCHEDSTATS) [Y/n/?] y
+  Collect kernel timers statistics (TIMER_STATS) [Y/n/?] y
+  RT Mutex debugging, deadlock detection (DEBUG_RT_MUTEXES) [Y/n/?] y
+  Built-in scriptable tester for rt-mutexes (RT_MUTEX_TESTER) [Y/n/?] y
+  Spinlock and rw-lock debugging: basic checks (DEBUG_SPINLOCK) [Y/?] y
+  Mutex debugging: basic checks (DEBUG_MUTEXES) [Y/?] y
+  Lock debugging: detect incorrect freeing of live locks (DEBUG_LOCK_ALLOC) [Y/?] y
+  Lock debugging: prove locking correctness (PROVE_LOCKING) [Y/n/?] y
+  Lock dependency engine debugging (DEBUG_LOCKDEP) [Y/n/?] y
+  Spinlock debugging: sleep-inside-spinlock checking (DEBUG_SPINLOCK_SLEEP) [Y/n/?] y
+  Locking API boot-time self-tests (DEBUG_LOCKING_API_SELFTESTS) [Y/n/?] y
+  kobject debugging (DEBUG_KOBJECT) [Y/n/?] y
+  Compile the kernel with debug info (DEBUG_INFO) [Y/n/?] y
+  Debug VM (DEBUG_VM) [Y/n/?] y
+  Debug linked list manipulation (DEBUG_LIST) [Y/n/?] y
+  Compile the kernel with frame pointers (FRAME_POINTER) [Y/n/?] y
+  Force gcc to inline functions marked 'inline' (FORCED_INLINING) [Y/n/?] y
+  torture tests for RCU (RCU_TORTURE_TEST) [M/n/?] m
+  Fault-injection framework (FAULT_INJECTION) [Y/n/?] y
+    Fault-injection capability for kmalloc (FAILSLAB) [Y/n/?] y
+    Fault-injection capabilitiy for alloc_pages() (FAIL_PAGE_ALLOC) [Y/n/?] y
+    Fault-injection capability for disk IO (FAIL_MAKE_REQUEST) [Y/n/?] y
+    Debugfs entries for fault-injection capabilities (FAULT_INJECTION_DEBUG_FS) [Y/n/?] y
+  Write protect kernel read-only data structures (DEBUG_RODATA) [Y/n/?] y
+  Built-in Kernel Debugger support (KDB) [N/y/?] (NEW) 

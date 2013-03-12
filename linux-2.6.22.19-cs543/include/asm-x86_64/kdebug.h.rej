@@ -1,0 +1,11 @@
+--- include/asm-x86_64/kdebug.h
++++ include/asm-x86_64/kdebug.h
+@@ -23,6 +23,8 @@
+ 	DIE_CALL,
+ 	DIE_NMI_IPI,
+ 	DIE_PAGE_FAULT,
++	DIE_KDEBUG_ENTER,
++	DIE_KDEBUG_LEAVE,
+ };
+ 
+ extern void printk_address(unsigned long address);

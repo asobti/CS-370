@@ -212,9 +212,53 @@ static inline void sg_inc_cpu_power(struct sched_group *sg, u32 val)
  * priority thread gets MIN_TIMESLICE worth of execution time.
  */
 
+// static inline unsigned int task_timeslice(struct task_struct *p)
+// {
+// 	return static_prio_timeslice(p->static_prio);
+// }
+
+/*
+ * Modified task_timeslice
+ * Timeslice allocated entirely depends on total number of users
+ * and number of processes per user.
+ * Task priority is completely ignored
+ *
+ * Timeslice allocated is calculated using
+ * ((TIMESLICE_USER_FACTOR * DEF_TIMESLICE) / USER_PROCESSES)
+ */
 static inline unsigned int task_timeslice(struct task_struct *p)
-{
-	return static_prio_timeslice(p->static_prio);
+{	
+	const int TIMESLICE_USER_FACTOR = 5;
+	const int USER_DEF_TIMESLICE = TIMESLICE_USER_FACTOR * DEF_TIMESLICE;
+
+	struct user_struct* current_user;
+	unsigned int timeslice;
+
+	// the atomic_t value of the number of processes the user is running
+	atomic_t processes;	
+
+	// the underlying volatile int for the atomic_t
+	int num_process;
+
+	current_user = p->user;
+	processes = current_user->processes;
+	num_process = atomic_read(&processes);
+
+	// We shouldn't need to worry about division by 0, because we're getting current_user
+	// from the current task, thus it is guaranteed that the current_user always has
+	// atleast one task. However, we'll play it safe anyways.
+	if (!num_process) 
+		num_process = 1;
+	
+
+	// we reserve (TIMESLICE_USER_FACTOR * DEF_TIMESLICE) for each user. 
+	// So, if a user has x processes running, each of
+	// them get ((TIMESLICE_USER_FACTOR * DEF_TIMESLICE) / x) milliseconds
+	// timeslice = (unsigned int)(USER_DEF_TIMESLICE / atomic_read(&processes));
+	
+	timeslice = (unsigned int)(USER_DEF_TIMESLICE / num_process);
+	
+	return timeslice;
 }
 
 /*
@@ -1829,8 +1873,8 @@ void fastcall wake_up_new_task(struct task_struct *p, unsigned long clone_flags)
  * Potentially available exiting-child timeslices are
  * retrieved here - this way the parent does not get
  * penalized for creating too many threads.
- *
- * (this cannot be used to 'generate' timeslices
+ 
+* * (this cannot be used to 'generate' timeslices
  * artificially, because any timeslice recovered here
  * was given away by the parent in the first place.)
  */
@@ -3672,7 +3716,7 @@ need_resched_nonpreemptible:
 			delta = delta * (ON_RUNQUEUE_WEIGHT * 128 / 100) / 128;
 
 		array = next->array;
-		new_prio = recalc_task_prio(next, next->timestamp + delta);
+		new_prio = recalc_task_prio(next, next->timestamp + delta);		/* IMPORTANT */
 
 		if (unlikely(next->prio != new_prio)) {
 			dequeue_task(next, array);
@@ -7157,7 +7201,7 @@ void normalize_rt_tasks(void)
 
 #endif /* CONFIG_MAGIC_SYSRQ */
 
-#ifdef CONFIG_IA64
+#if	defined(CONFIG_IA64) || defined(CONFIG_KDB)
 /*
  * These functions are only useful for the IA64 MCA handling.
  *
@@ -7200,3 +7244,80 @@ void set_curr_task(int cpu, struct task_struct *p)
 }
 
 #endif
+
+#ifdef	CONFIG_KDB
+
+#include <linux/kdb.h>
+
+static void
+kdb_prio(char *name, struct prio_array *array, kdb_printf_t xxx_printf)
+{
+	int pri;
+
+	xxx_printf("  %s nr_active:%d  bitmap: 0x%lx 0x%lx 0x%lx\n",
+		name, array->nr_active,
+		array->bitmap[0], array->bitmap[1], array->bitmap[2]);
+
+	pri = sched_find_first_bit(array->bitmap);
+	if (pri != MAX_PRIO) {
+		xxx_printf("   bitmap priorities:");
+		while (pri != MAX_PRIO) {
+			xxx_printf(" %d", pri);
+			pri++;
+			pri = find_next_bit(array->bitmap, MAX_PRIO, pri);
+		}
+		xxx_printf("\n");
+	}
+
+	for (pri = 0; pri < MAX_PRIO; pri++) {
+		int printed_hdr = 0;
+		struct list_head *head, *curr;
+
+		head = array->queue + pri;
+		curr = head->next;
+		while(curr != head) {
+			struct task_struct *task;
+			if (!printed_hdr) {
+				xxx_printf("   queue at priority=%d\n", pri);
+				printed_hdr = 1;
+			}
+			task = list_entry(curr, struct task_struct, run_list);
+			xxx_printf("    0x%p %d %s  time_slice:%d\n",
+				   task, task->pid, task->comm,
+				   task->time_slice);
+			curr = curr->next;
+		}
+	}
+}
+
+/* This code must be in sched.c because struct rq is only defined in this
+ * source.  To allow most of kdb to be modular, this code cannot call any kdb
+ * functions directly, any external functions that it needs must be passed in
+ * as parameters.
+ */
+
+void
+kdb_runqueue(unsigned long cpu, kdb_printf_t xxx_printf)
+{
+	struct rq *rq;
+
+	rq = cpu_rq(cpu);
+
+	xxx_printf("CPU%ld lock:%s curr:0x%p(%d)(%s)",
+		   cpu, (spin_is_locked(&rq->lock))?"LOCKED":"free",
+		   rq->curr, rq->curr->pid, rq->curr->comm);
+	if (rq->curr == rq->idle)
+		xxx_printf(" is idle");
+	xxx_printf("\n ");
+#ifdef CONFIG_SMP
+	xxx_printf(" cpu_load:%lu %lu %lu",
+			rq->cpu_load[0], rq->cpu_load[1], rq->cpu_load[2]);
+#endif
+	xxx_printf(" nr_running:%lu nr_switches:%llu\n",
+		   rq->nr_running, rq->nr_switches);
+	kdb_prio("active", rq->active, xxx_printf);
+	kdb_prio("expired", rq->expired, xxx_printf);
+}
+EXPORT_SYMBOL(kdb_runqueue);
+
+#endif	/* CONFIG_KDB */

@@ -1,0 +1,11 @@
+--- include/asm-i386/kdebug.h
++++ include/asm-i386/kdebug.h
+@@ -23,6 +23,8 @@
+ 	DIE_DIE,
+ 	DIE_NMIWATCHDOG,
+ 	DIE_KERNELDEBUG,
++	DIE_KDEBUG_ENTER,
++	DIE_KDEBUG_LEAVE,
+ 	DIE_TRAP,
+ 	DIE_GPF,
+ 	DIE_CALL,
