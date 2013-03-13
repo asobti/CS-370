@@ -77,6 +77,11 @@ void main() {
 
 	tarfile_contents[tarfile_size] = 0;
 
+	printf("File name: %s\n", file->name);
+	printf("UID: %d\n", octalStringToInt(file->uid, 7));
+	printf("GID: %d\n", octalStringToInt(file->gid, 7));
+	printf("File size: %d\n", tarfile_size);
+	printf("File contents: \n");
 	printf("%s", tarfile_contents);
 
 	free(file);
