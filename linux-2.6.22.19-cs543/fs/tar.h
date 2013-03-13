@@ -3,7 +3,7 @@
 
 
 // define file operations
-
+const char* sourceFile;
 
 static int tarfs_open(struct inode *inode, struct file *filp);
 

@@ -38,7 +38,7 @@ static struct file_system_type tar_fs_type = {
 static struct vfsmount *tar_mnt __read_mostly;
 
 static int tarfs_open(struct inode *inode, struct file *filp) {
-	 filp->private_data = inode->i_private;
+	filp->private_data = inode->i_private;
 	return 0;
 }
 
@@ -193,7 +193,7 @@ static void tarfs_create_files (struct super_block *sb, struct dentry *root)
 	atomic_set(&subcounter, 0);
 	subdir = tarfs_create_dir(sb, root, "subdir");
 	if (subdir)
-		tarfs_create_file(sb, subdir, "subcounter", &subcounter);
+		tarfs_create_file(sb, subdir, sourceFile, &subcounter);
 }
 
 
@@ -245,6 +245,8 @@ static int tarfs_fill_super (struct super_block *sb, void *data, int silent)
 
 static struct super_block *tarfs_get_super(struct file_system_type *fst,
 		int flags, const char *devname, void *data, struct vfsmount *mnt) {
+	// copy filename to a global variable for later use
+	sourceFile = devname;	
 	return get_sb_single(fst, flags, data, tarfs_fill_super, mnt);
 }
 
