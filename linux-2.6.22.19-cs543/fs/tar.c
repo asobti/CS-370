@@ -18,9 +18,6 @@
 #include <asm/ioctls.h>
 #include "tar.h"
 
-//#define TARFS_MAGIC 0x19980122
-//#define TMPSIZE 20
-
 static struct super_operations tarfs_s_ops = {
         .statfs         = simple_statfs,
         .drop_inode     = generic_delete_inode,
@@ -32,13 +29,18 @@ static struct file_operations tarfs_file_ops = {
 	.write 		=	tarfs_write_file,
 };
 
+static struct file_system_type tar_fs_type = {	
+	.name		= "tarfs",
+	.get_sb		= tarfs_get_super,
+	.kill_sb	= kill_anon_super,
+};
+
 static struct vfsmount *tar_mnt __read_mostly;
 
 static int tarfs_open(struct inode *inode, struct file *filp) {
 	 filp->private_data = inode->i_private;
 	return 0;
 }
-
 
 static ssize_t tarfs_read_file(struct file *filp, char* buf, size_t count, loff_t *offset) {
 
@@ -104,95 +106,95 @@ static struct inode *tarfs_make_inode(struct super_block *sb, int mode)
 }
 
 
-// static struct dentry *tarfs_create_file (struct super_block *sb,
-// 		struct dentry *dir, const char *name,
-// 		atomic_t *counter)
-// {
-// 	struct dentry *dentry;
-// 	struct inode *inode;
-// 	struct qstr qname;
-// 	/*
-// 	 * Make a hashed version of the name to go with the dentry.
-// 	 */
-// 	qname.name = name;
-// 	qname.len = strlen (name);
-// 	qname.hash = full_name_hash(name, qname.len);
+static struct dentry *tarfs_create_file (struct super_block *sb,
+		struct dentry *dir, const char *name,
+		atomic_t *counter)
+{
+	struct dentry *dentry;
+	struct inode *inode;
+	struct qstr qname;
+	/*
+	 * Make a hashed version of the name to go with the dentry.
+	 */
+	qname.name = name;
+	qname.len = strlen (name);
+	qname.hash = full_name_hash(name, qname.len);
 	
-// 	 * Now we can create our dentry and the inode to go with it.
+	// Now we can create our dentry and the inode to go with it.
 	 
-// 	dentry = d_alloc(dir, &qname);
-// 	if (! dentry)
-// 		goto out;
-// 	inode = tarfs_make_inode(sb, S_IFREG | 0644);
-// 	if (! inode)
-// 		goto out_dput;
-// 	inode->i_fop = &tarfs_file_ops;
-// 	inode->i_private = counter;
-// 	/*
-// 	 * Put it all into the dentry cache and we're done.
-// 	 */
-// 	d_add(dentry, inode);
-// 	return dentry;
-// 	/*
-// 	 * Then again, maybe it didn't work.
-// 	 */
-//   out_dput:
-// 	dput(dentry);
-//   out:
-// 	return 0;
-// }
+	dentry = d_alloc(dir, &qname);
+	if (! dentry)
+		goto out;
+	inode = tarfs_make_inode(sb, S_IFREG | 0644);
+	if (! inode)
+		goto out_dput;
+	inode->i_fop = &tarfs_file_ops;
+	inode->i_private = counter;
+	/*
+	 * Put it all into the dentry cache and we're done.
+	 */
+	d_add(dentry, inode);
+	return dentry;
+	/*
+	 * Then again, maybe it didn't work.
+	 */
+  out_dput:
+	dput(dentry);
+  out:
+	return 0;
+}
 
 
-// static struct dentry *tarfs_create_dir (struct super_block *sb,
-// 		struct dentry *parent, const char *name)
-// {
-// 	struct dentry *dentry;
-// 	struct inode *inode;
-// 	struct qstr qname;
+static struct dentry *tarfs_create_dir (struct super_block *sb,
+		struct dentry *parent, const char *name)
+{
+	struct dentry *dentry;
+	struct inode *inode;
+	struct qstr qname;
 
-// 	qname.name = name;
-// 	qname.len = strlen (name);
-// 	qname.hash = full_name_hash(name, qname.len);
-// 	dentry = d_alloc(parent, &qname);
-// 	if (! dentry)
-// 		goto out;
+	qname.name = name;
+	qname.len = strlen (name);
+	qname.hash = full_name_hash(name, qname.len);
+	dentry = d_alloc(parent, &qname);
+	if (! dentry)
+		goto out;
 
-// 	inode = tarfs_make_inode(sb, S_IFDIR | 0644);
-// 	if (! inode)
-// 		goto out_dput;
-// 	inode->i_op = &simple_dir_inode_operations;
-// 	inode->i_fop = &simple_dir_operations;
+	inode = tarfs_make_inode(sb, S_IFDIR | 0644);
+	if (! inode)
+		goto out_dput;
+	inode->i_op = &simple_dir_inode_operations;
+	inode->i_fop = &simple_dir_operations;
 
-// 	d_add(dentry, inode);
-// 	return dentry;
+	d_add(dentry, inode);
+	return dentry;
 
-//   out_dput:
-// 	dput(dentry);
-//   out:
-// 	return 0;
-// }
+  out_dput:
+	dput(dentry);
+  out:
+	return 0;
+}
 
 
 static atomic_t counter, subcounter;
 
-// static void tarfs_create_files (struct super_block *sb, struct dentry *root)
-// {
-// 	struct dentry *subdir;
+static void tarfs_create_files (struct super_block *sb, struct dentry *root)
+{
+	struct dentry *subdir;
 
-// 	/*
-// 	 * One counter in the top-level directory.
-// 	 */
-// 	atomic_set(&counter, 0);
-// 	tarfs_create_file(sb, root, "counter", &counter);
+	/*
+	 * One counter in the top-level directory.
+	 */
+	atomic_set(&counter, 0);
+	tarfs_create_file(sb, root, "counter", &counter);
 
-// 	/*
-// 	 * And one in a subdirectory.
-// 	 */
-// 	// atomic_set(&subcounter, 0);
-// 	// subdir = tarfs_create_dir(sb, root, "subdir");
-// 	// if (subdir)
-// 	// 	tarfs_create_file(sb, subdir, "subcounter", &subcounter);
-// }
+	/*
+	 * And one in a subdirectory.
+	 */
+	atomic_set(&subcounter, 0);
+	subdir = tarfs_create_dir(sb, root, "subdir");
+	if (subdir)
+		tarfs_create_file(sb, subdir, "subcounter", &subcounter);
+}
 
 
 static int tarfs_fill_super (struct super_block *sb, void *data, int silent)
@@ -231,7 +233,7 @@ static int tarfs_fill_super (struct super_block *sb, void *data, int silent)
 	/*
 	 * Make up the files which will be in this filesystem, and we're done.
 	 */
-	// tarfs_create_files (sb, root_dentry);
+	tarfs_create_files (sb, root_dentry);
 	return 0;
 	
   out_iput:
@@ -242,23 +244,28 @@ static int tarfs_fill_super (struct super_block *sb, void *data, int silent)
 
 
 static struct super_block *tarfs_get_super(struct file_system_type *fst,
-		int flags, const char *devname, void *data) {
-	return get_sb_single(fst, flags, data, tarfs_fill_super, tar_mnt);
+		int flags, const char *devname, void *data, struct vfsmount *mnt) {
+	return get_sb_single(fst, flags, data, tarfs_fill_super, mnt);
 }
 
-static struct file_system_type tar_fs_type = {
-	.owner		= THIS_MODULE,
-	.name		= "tarfs",
-	.get_sb		= tarfs_get_super,
-	.kill_sb	= kill_anon_super,
-};
-
 static int __init init_tar_fs(void) {
-	return register_filesystem(&tar_fs_type);
+	int err = register_filesystem(&tar_fs_type);
+
+	if (!err) {
+		tar_mnt = kern_mount(&tar_fs_type);
+
+		if (IS_ERR(tar_mnt)) {
+			err = PTR_ERR(tar_mnt);
+			unregister_filesystem(&tar_fs_type);
+		}
+	}
+
+	return err;
 }
 
 static void __exit exit_tar_fs(void) {
 	unregister_filesystem(&tar_fs_type);
+	mntput(tar_mnt);
 }
 
 

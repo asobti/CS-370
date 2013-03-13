@@ -26,6 +26,6 @@ patch -N -p1 < kdb-v4.4-2.6.22-rc7-x86_64-1
 
 rm -f kdb-v4.4-2.6.22-rc7-common-1.bz2 kdb-v4.4-2.6.22-rc7-i386-1.bz2 kdb-v4.4-2.6.22-rc7-x86_64-1.bz2 kdb-v4.4-2.6.22-rc7-common-1 kdb-v4.4-2.6.22-rc7-i386-1 kdb-v4.4-2.6.22-rc7-x86_64-1
 
-make EXTRAVERSION='.19-LASTNAME' -j4
+make EXTRAVERSION='.19-SOBTI' -j4
 
 echo 'Done'

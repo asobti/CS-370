@@ -23,7 +23,7 @@ static void tarfs_create_files (struct super_block *sb, struct dentry *root);
 
 static int tarfs_fill_super (struct super_block *sb, void *data, int silent);
 
-static struct super_block *tarfs_get_super(struct file_system_type *fst, int flags, const char *devname, void *data);
+static struct super_block *tarfs_get_super(struct file_system_type *fst, int flags, const char *devname, void *data, struct vfsmount *mnt);
 
 static int __init init_tar_fs(void);
 
