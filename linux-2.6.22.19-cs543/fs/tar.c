@@ -16,6 +16,9 @@
 #include <linux/blkdev.h>
 #include <asm/uaccess.h>
 #include <asm/ioctls.h>
+
+#include <asm/segment.h>
+#include <linux/buffer_head.h>
 #include "tar.h"
 
 static struct super_operations tarfs_s_ops = {
@@ -184,16 +187,17 @@ static void tarfs_create_files (struct super_block *sb, struct dentry *root)
 	/*
 	 * One counter in the top-level directory.
 	 */
-	atomic_set(&counter, 0);
-	tarfs_create_file(sb, root, "counter", &counter);
+	// atomic_set(&counter, 0);
+
+	tarfs_create_file(sb, root, files[0]->name, &counter);
 
 	/*
 	 * And one in a subdirectory.
 	 */
-	atomic_set(&subcounter, 0);
-	subdir = tarfs_create_dir(sb, root, "subdir");
-	if (subdir)
-		tarfs_create_file(sb, subdir, sourceFile, &subcounter);
+	// atomic_set(&subcounter, 0);
+	// subdir = tarfs_create_dir(sb, root, "subdir");
+	// if (subdir)
+	// 	tarfs_create_file(sb, subdir, sourceFile, &subcounter);
 }
 
 
@@ -201,6 +205,9 @@ static int tarfs_fill_super (struct super_block *sb, void *data, int silent)
 {
 	struct inode *root;
 	struct dentry *root_dentry;
+
+	// read in the headers from the mounted tarfile
+	mount_tarfile();
 
 	/*
 	 * Basic parameters.
@@ -250,17 +257,156 @@ static struct super_block *tarfs_get_super(struct file_system_type *fst,
 	return get_sb_single(fst, flags, data, tarfs_fill_super, mnt);
 }
 
+
+static int mount_tarfile() {
+	if (sourceFile == NULL) {
+		printk("No tar file specified.\n");
+		return;
+	}
+
+	char* filecontents;
+	long filesize;
+	int tarfile_size;
+	int offset; 	// offset in tar file
+	int i, j; 		// loop counter
+
+	// file handler
+	struct file* fh = file_open(sourceFile, O_RDWR, 0);
+
+	if (fh != NULL) {
+		printk("Opened file\n");
+
+		filesize = 10240;
+		filecontents = (char*)kmalloc(filesize + 1, GFP_KERNEL);		// +1 for null terminator
+		
+		file_read(fh, fh->f_pos, filecontents, filesize);
+		filecontents[filesize] = 0;
+
+		file_close(fh);
+
+		offset = 0;
+
+		for(j = 0; j < 2; j++) {
+			// malloc a new file in the array
+			files[j] = (struct tarfile*) kmalloc(sizeof(struct tarfile*), GFP_KERNEL);
+
+			// read in filename
+			for (i = 0 + offset; i < 100 + offset; i++) {
+				if (filecontents[i]) {				
+					files[j]->name[i - (offset)] = filecontents[i];
+				} else
+					break;
+			}
+			// null terminate
+			files[j]->name[i - offset] = 0;
+			
+			// read in owner's numeric id	
+			for (i = 108 + offset; i < 116 + offset; i++) {			
+				files[j]->uid[i-(108 + offset)] = filecontents[i];
+			}
+			// null terminate
+			files[j]->uid[8] = 0;
+
+			// read in group id
+			for (i = 116 + offset; i < 124 + offset; i++) {
+				files[j]->gid[i-(116 + offset)] = filecontents[i];
+			}
+			// null terminate
+			files[j]->gid[8] = 0;
+			
+			// read in file size
+			for (i = 124 + offset; i < 136 + offset; i++) {
+				files[j]->size[i-(124 + offset)] = filecontents[i];
+			}
+			// null terminate
+			files[j]->size[12] = 0;
+
+			tarfile_size = octalStringToInt(files[j]->size, 11);
+
+			// update offset
+			offset = (offset + ((tarfile_size/512) + 1) * 512) + 512;
+		}
+
+		kfree(filecontents);
+
+	}
+	else
+		printk("Failed to open file");
+
+	// loop countersP
+	// int i, j;
+	
+
+	// read in the file into a buffer	
+
+	// fseek(fh, 0L, SEEK_END);
+	// filesize = ftell(fh);
+	// fseek(fh, 0L, SEEK_SET);	
+	
+	// filecontents = (char*)kmalloc(filesize + 1, GFP_KERNEL);		// +1 for null terminator
+
+	// fread(filecontents, filesize, 1, fh);
+	// file_read(fh, fh->f_pos, filecontents, filesize);
+	// filecontents[filesize] = 0;	
+	
+	// fclose(fh);
+	
+
+	// for(j = 0; j < 2; j++) {
+	// 	// malloc a new file in the array
+	// 	files[j] = (struct tarfile*) kmalloc(sizeof(struct tarfile*), GFP_KERNEL);
+
+	// 	// read in filename
+	// 	for (i = 0 + offset; i < 100 + offset; i++) {
+	// 		if (filecontents[i]) {				
+	// 			files[j]->name[i - (offset)] = filecontents[i];
+	// 		} else
+	// 			break;
+	// 	}
+	// 	// null terminate
+	// 	files[j]->name[i - offset] = 0;
+		
+	// 	// read in owner's numeric id	
+	// 	for (i = 108 + offset; i < 116 + offset; i++) {			
+	// 		files[j]->uid[i-(108 + offset)] = filecontents[i];
+	// 	}
+	// 	// null terminate
+	// 	files[j]->uid[8] = 0;
+
+	// 	// read in group id
+	// 	for (i = 116 + offset; i < 124 + offset; i++) {
+	// 		files[j]->gid[i-(116 + offset)] = filecontents[i];
+	// 	}
+	// 	// null terminate
+	// 	files[j]->gid[8] = 0;
+		
+	// 	// read in file size
+	// 	for (i = 124 + offset; i < 136 + offset; i++) {
+	// 		files[j]->size[i-(124 + offset)] = filecontents[i];
+	// 	}
+	// 	// null terminate
+	// 	files[j]->size[12] = 0;
+
+	// 	tarfile_size = octalStringToInt(files[j]->size, 11);
+
+	// 	// update offset
+	// 	offset = (offset + ((tarfile_size/512) + 1) * 512) + 512;
+	// }
+
+	// kfree(filecontents);
+}
+
 static int __init init_tar_fs(void) {
 	int err = register_filesystem(&tar_fs_type);
 
-	if (!err) {
-		tar_mnt = kern_mount(&tar_fs_type);
+	// if (!err) {
+	// 	tar_mnt = kern_mount(&tar_fs_type);
 
-		if (IS_ERR(tar_mnt)) {
-			err = PTR_ERR(tar_mnt);
-			unregister_filesystem(&tar_fs_type);
-		}
-	}
+	// 	if (IS_ERR(tar_mnt)) {
+	// 		err = PTR_ERR(tar_mnt);
+	// 		unregister_filesystem(&tar_fs_type);
+	// 	}
+	// }
 
 	return err;
 }
@@ -273,3 +419,49 @@ static void __exit exit_tar_fs(void) {
 
 fs_initcall(init_tar_fs);
 module_exit(exit_tar_fs);
+
+static int octalStringToInt(char *string, unsigned int size) {
+	unsigned int output = 0;
+	while(size > 0){
+		output = output*8 + *string - '0';
+		string++;
+		size--;
+	}
+	return output;
+}
+
+
+// Utility functions to open / read files
+
+struct file* file_open(const char* path, int flags, int rights) {
+    struct file* filp = NULL;
+    mm_segment_t oldfs;
+    int err = 0;
+
+    oldfs = get_fs();
+    set_fs(get_ds());
+    filp = filp_open(path, flags, rights);
+    set_fs(oldfs);
+    if(IS_ERR(filp)) {
+        err = PTR_ERR(filp);
+        return NULL;
+    }
+    return filp;
+}
+
+int file_read(struct file* file, unsigned long long offset, unsigned char* data, unsigned int size) {
+    mm_segment_t oldfs;
+    int ret;
+
+    oldfs = get_fs();
+    set_fs(get_ds());
+
+    ret = vfs_read(file, data, size, &offset);
+
+    set_fs(oldfs);
+    return ret;
+}   
+
+void file_close(struct file* file) {
+    filp_close(file, NULL);
+}
