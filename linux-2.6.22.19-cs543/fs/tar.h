@@ -19,7 +19,8 @@ struct tarfile
   char devmajor[8];             /* 329 */
   char devminor[8];             /* 337 */
   char prefix[155];             /* 345 */
-                                /* 500 */  
+                                /* 500 */
+  char* contents;
 };
 
 // define file operations
@@ -34,9 +35,9 @@ static ssize_t tarfs_read_file(struct file *filp, char* buf, size_t count, loff_
 
 static ssize_t tarfs_write_file(struct file *filp, const char *buf, size_t count, loff_t *offset);
 
-static struct inode *tarfs_make_inode(struct super_block *sb, int mode);
+static struct inode *tarfs_make_inode(struct super_block *sb, int mode, int file_idx);
 
-static struct dentry *tarfs_create_file (struct super_block *sb, struct dentry *dir, const char *name, atomic_t *counter);
+static struct dentry *tarfs_create_file (struct super_block *sb, struct dentry *dir, const char *name, atomic_t *counter, int file_idx);
 
 
 static struct dentry *tarfs_create_dir (struct super_block *sb, struct dentry *parent, const char *name);

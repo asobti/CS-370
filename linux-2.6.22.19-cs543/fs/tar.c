@@ -41,28 +41,63 @@ static struct file_system_type tar_fs_type = {
 static struct vfsmount *tar_mnt __read_mostly;
 
 static int tarfs_open(struct inode *inode, struct file *filp) {
+	// assign index in our array to filp->private_data
+	// for easy access later	
 	filp->private_data = inode->i_private;
 	return 0;
 }
 
 static ssize_t tarfs_read_file(struct file *filp, char* buf, size_t count, loff_t *offset) {
-
-	atomic_t *counter = (atomic_t *) filp->private_data;
-	int v = atomic_read(counter);
+	char* filename;
+	int j;
 	int len;
-	atomic_inc(counter);
-	char tmp[TMPSIZE];
 
-	len = snprintf(tmp, TMPSIZE, "%d\n", v);
+	filename = filp->f_dentry->d_name.name;
+
+	// use filename to find index for this file in our files array
+	for (j = 0; j < 2; j++)
+		if (strcmp(filename, files[j]->name) == 0)
+			break;
+	
+	if (j == 2) {
+		// file not found
+		printk("File %s not found.\n", filename);
+		return 0;	
+	}
+
+	len = octalStringToInt(files[j]->size, 11);
+
 	if (*offset > len)
 		return 0;
-	if (count > len - *offset)
+	
+	if (count > len - *offset) 
 		count = len - *offset;
 
-	if (copy_to_user(buf, tmp + *offset, count))
-		return -EFAULT;
+	printk("Reading %ld bytes.\n", count);
+
+	if (copy_to_user(buf, files[j]->contents, count))
+		return EFAULT;
+
 	*offset += count;
 	return count;
+
+	// atomic_t *counter = (atomic_t *) filp->private_data;
+	// int v = atomic_read(counter);
+	// int len;
+	// atomic_inc(counter);
+	// char tmp[TMPSIZE];
+
+	// len = snprintf(tmp, TMPSIZE, "%d\n", v);
+	// if (*offset > len)
+	// 	return 0;
+	// if (count > len - *offset)
+	// 	count = len - *offset;
+
+	// if (copy_to_user(buf, files[0]->contents, count))
+	// 	return -EFAULT;
+
+	// *offset += count;
+	// return count;
 }
 
 
@@ -84,34 +119,33 @@ static ssize_t tarfs_write_file(struct file *filp, const char *buf,
 	return count;
 }
 
-// static int tarfs_fill_super (struct super_block *sb, 
-//                                void *data, int silent) {
-// 	sb->s_blocksize = PAGE_CACHE_SIZE;
-// 	sb->s_blocksize_bits = PAGE_CACHE_SHIFT;
-// 	sb->s_magic = TARFS_MAGIC;
-// 	sb->s_op = &tarfs_s_ops;
-
-// 	// called at mount time
-// }
-
-static struct inode *tarfs_make_inode(struct super_block *sb, int mode)
+static struct inode *tarfs_make_inode(struct super_block *sb, int mode, int file_idx)
 {
 	struct inode *ret = new_inode(sb);
 
 	if (ret) {
 		ret->i_mode = mode;
-		ret->i_uid = ret->i_gid = 0;
+		ret->i_uid = 0;		
 		ret->i_blkbits = blksize_bits(PAGE_CACHE_SIZE);
 		ret->i_blocks = 0;
 		ret->i_atime = ret->i_mtime = ret->i_ctime = CURRENT_TIME;
+
+		if (file_idx < 0) {
+			// not in our array
+			ret->i_gid = 0;
+			ret->i_size = 4096;
+		} else {
+			// set GID and size (bytes) for files in our array
+			ret->i_gid = octalStringToInt(files[file_idx]->gid, 7);
+			ret->i_size = octalStringToInt(files[file_idx]->size, 11);
+		}
 	}
 	return ret;
 }
 
 
 static struct dentry *tarfs_create_file (struct super_block *sb,
-		struct dentry *dir, const char *name,
-		atomic_t *counter)
+		struct dentry *dir, const char *name, atomic_t *counter, int file_idx)
 {
 	struct dentry *dentry;
 	struct inode *inode;
@@ -128,7 +162,7 @@ static struct dentry *tarfs_create_file (struct super_block *sb,
 	dentry = d_alloc(dir, &qname);
 	if (! dentry)
 		goto out;
-	inode = tarfs_make_inode(sb, S_IFREG | 0644);
+	inode = tarfs_make_inode(sb, S_IFREG | 0644, file_idx);
 	if (! inode)
 		goto out_dput;
 	inode->i_fop = &tarfs_file_ops;
@@ -162,7 +196,7 @@ static struct dentry *tarfs_create_dir (struct super_block *sb,
 	if (! dentry)
 		goto out;
 
-	inode = tarfs_make_inode(sb, S_IFDIR | 0644);
+	inode = tarfs_make_inode(sb, S_IFDIR | 0644, -1);
 	if (! inode)
 		goto out_dput;
 	inode->i_op = &simple_dir_inode_operations;
@@ -183,13 +217,15 @@ static atomic_t counter, subcounter;
 static void tarfs_create_files (struct super_block *sb, struct dentry *root)
 {
 	struct dentry *subdir;
-
+	int i;
 	/*
 	 * One counter in the top-level directory.
 	 */
 	// atomic_set(&counter, 0);
 
-	tarfs_create_file(sb, root, files[0]->name, &counter);
+	for (i = 0; i < 2; i++) {
+		tarfs_create_file(sb, root, files[i]->name, &counter, i);
+	}
 
 	/*
 	 * And one in a subdirectory.
@@ -223,7 +259,7 @@ static int tarfs_fill_super (struct super_block *sb, void *data, int silent)
 	 * don't have to mess with actually *doing* things inside this
 	 * directory.
 	 */
-	root = tarfs_make_inode (sb, S_IFDIR | 0755);
+	root = tarfs_make_inode (sb, S_IFDIR | 0755, -1);
 	if (! root)
 		goto out;
 	root->i_op = &simple_dir_inode_operations;
@@ -261,7 +297,7 @@ static struct super_block *tarfs_get_super(struct file_system_type *fst,
 static int mount_tarfile() {
 	if (sourceFile == NULL) {
 		printk("No tar file specified.\n");
-		return;
+		return 1;
 	}
 
 	char* filecontents;
@@ -274,8 +310,6 @@ static int mount_tarfile() {
 	struct file* fh = file_open(sourceFile, O_RDWR, 0);
 
 	if (fh != NULL) {
-		printk("Opened file\n");
-
 		filesize = 10240;
 		filecontents = (char*)kmalloc(filesize + 1, GFP_KERNEL);		// +1 for null terminator
 		
@@ -323,92 +357,32 @@ static int mount_tarfile() {
 
 			tarfile_size = octalStringToInt(files[j]->size, 11);
 
+			files[j]->contents = kmalloc(tarfile_size, GFP_KERNEL);
+
+			for (i = 512 + offset; i < 512 + tarfile_size + offset; i++) {
+				files[j]->contents[i - (512 + offset)] = filecontents[i];
+			}
+
+			// null terminate to be safe
+			files[j]->contents[tarfile_size] = 0;
+
 			// update offset
 			offset = (offset + ((tarfile_size/512) + 1) * 512) + 512;
 		}
 
 		kfree(filecontents);
 
+		printk("Mounted");
+		return 0;
 	}
-	else
+	else {
 		printk("Failed to open file");
-
-	// loop countersP
-	// int i, j;
-	
-
-	// read in the file into a buffer	
-
-	// fseek(fh, 0L, SEEK_END);
-	// filesize = ftell(fh);
-	// fseek(fh, 0L, SEEK_SET);	
-	
-	// filecontents = (char*)kmalloc(filesize + 1, GFP_KERNEL);		// +1 for null terminator
-
-	// fread(filecontents, filesize, 1, fh);
-	// file_read(fh, fh->f_pos, filecontents, filesize);
-	// filecontents[filesize] = 0;	
-	
-	// fclose(fh);
-	
-
-	// for(j = 0; j < 2; j++) {
-	// 	// malloc a new file in the array
-	// 	files[j] = (struct tarfile*) kmalloc(sizeof(struct tarfile*), GFP_KERNEL);
-
-	// 	// read in filename
-	// 	for (i = 0 + offset; i < 100 + offset; i++) {
-	// 		if (filecontents[i]) {				
-	// 			files[j]->name[i - (offset)] = filecontents[i];
-	// 		} else
-	// 			break;
-	// 	}
-	// 	// null terminate
-	// 	files[j]->name[i - offset] = 0;
-		
-	// 	// read in owner's numeric id	
-	// 	for (i = 108 + offset; i < 116 + offset; i++) {			
-	// 		files[j]->uid[i-(108 + offset)] = filecontents[i];
-	// 	}
-	// 	// null terminate
-	// 	files[j]->uid[8] = 0;
-
-	// 	// read in group id
-	// 	for (i = 116 + offset; i < 124 + offset; i++) {
-	// 		files[j]->gid[i-(116 + offset)] = filecontents[i];
-	// 	}
-	// 	// null terminate
-	// 	files[j]->gid[8] = 0;
-		
-	// 	// read in file size
-	// 	for (i = 124 + offset; i < 136 + offset; i++) {
-	// 		files[j]->size[i-(124 + offset)] = filecontents[i];
-	// 	}
-	// 	// null terminate
-	// 	files[j]->size[12] = 0;
-
-	// 	tarfile_size = octalStringToInt(files[j]->size, 11);
-
-	// 	// update offset
-	// 	offset = (offset + ((tarfile_size/512) + 1) * 512) + 512;
-	// }
-
-	// kfree(filecontents);
+		return 1;
+	}
 }
 
 static int __init init_tar_fs(void) {
-	int err = register_filesystem(&tar_fs_type);
-
-	// if (!err) {
-	// 	tar_mnt = kern_mount(&tar_fs_type);
-
-	// 	if (IS_ERR(tar_mnt)) {
-	// 		err = PTR_ERR(tar_mnt);
-	// 		unregister_filesystem(&tar_fs_type);
-	// 	}
-	// }
-
-	return err;
+	return register_filesystem(&tar_fs_type);
 }
 
 static void __exit exit_tar_fs(void) {
@@ -416,9 +390,12 @@ static void __exit exit_tar_fs(void) {
 	mntput(tar_mnt);
 }
 
-
 fs_initcall(init_tar_fs);
 module_exit(exit_tar_fs);
+
+
+// Utility function to convert an octal string to int
+// Source: http://stackoverflow.com/questions/2505042/how-to-parse-a-tar-file-in-c
 
 static int octalStringToInt(char *string, unsigned int size) {
 	unsigned int output = 0;
@@ -432,6 +409,7 @@ static int octalStringToInt(char *string, unsigned int size) {
 
 
 // Utility functions to open / read files
+// Source: http://stackoverflow.com/questions/1184274/how-to-read-write-files-within-a-linux-kernel-module
 
 struct file* file_open(const char* path, int flags, int rights) {
     struct file* filp = NULL;
