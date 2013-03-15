@@ -16,5 +16,6 @@ struct tarfile
   char devmajor[8];             /* 329 */
   char devminor[8];             /* 337 */
   char prefix[155];             /* 345 */
-                                /* 500 */  
+                                /* 500 */
+  int contentOffset;
 };

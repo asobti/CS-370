@@ -7,7 +7,7 @@ struct tarfile
   char mode[8];                 /* 100 */
   char uid[8];                  /* 108 */
   char gid[8];                  /* 116 */
-  char size[12];                /* 124 */
+  int  size;                /* 124 */
   char mtime[12];               /* 136 */
   char chksum[8];               /* 148 */
   char typeflag;                /* 156 */
@@ -20,8 +20,10 @@ struct tarfile
   char devminor[8];             /* 337 */
   char prefix[155];             /* 345 */
                                 /* 500 */
-  char* contents;
+  int contentOffset;
 };
+
+char* filecontents;
 
 // define file operations
 const char* sourceFile = NULL;

@@ -88,6 +88,8 @@ void main() {
 		// null terminate
 		files[j]->size[12] = 0;
 
+		// store contents offset
+		files[j]->contentOffset = 512 + offset;
 		tarfile_size = octalStringToInt(files[j]->size, 11);
 		// files[j]->contents = (char*) malloc(tarfile_size + 1);
 		
@@ -111,10 +113,11 @@ void main() {
 	for (j = 0; j < 2; j++) {
 		printf("File name: %s\n", files[j]->name);
 		// printf("UID Octal: %s\n", files[j]->uid);
-		// printf("UID: %d\n", octalStringToInt(files[j]->uid, 7));
+		printf("UID: %d\n", octalStringToInt(files[j]->uid, 7));
 		printf("GID: %d\n", octalStringToInt(files[j]->gid, 7));
-		printf("File size: %d\n", tarfile_size);
-		printf("File contents: \n");
+		printf("File size: %d\n", octalStringToInt(files[j]->size, 11));
+		//printf("File contents: %s\n", files[j]->contents);
+		printf("Contents begin at offset: %d\n", files[j]->contentOffset);
 		printf("\n");		
 	}
 	

@@ -55,49 +55,31 @@ static ssize_t tarfs_read_file(struct file *filp, char* buf, size_t count, loff_
 	filename = filp->f_dentry->d_name.name;
 
 	// use filename to find index for this file in our files array
-	for (j = 0; j < 2; j++)
-		if (strcmp(filename, files[j]->name) == 0)
-			break;
+	// for (j = 0; j < 2; j++)
+	// 	if (strcmp(filename, files[j]->name) == 0)
+	// 		break;
 	
-	if (j == 2) {
-		// file not found
-		printk("File %s not found.\n", filename);
-		return 0;	
-	}
+	// if (j == 2) {
+	// 	// file not found
+	// 	printk("File %s not found.\n", filename);
+	// 	return 0;	
+	// }
 
-	len = octalStringToInt(files[j]->size, 11);
+	// len = octalStringToInt(files[j]->size, 11);
 
-	if (*offset > len)
-		return 0;
-	
-	if (count > len - *offset) 
-		count = len - *offset;
-
-	printk("Reading %ld bytes.\n", count);
-
-	if (copy_to_user(buf, files[j]->contents, count))
-		return EFAULT;
-
-	*offset += count;
-	return count;
-
-	// atomic_t *counter = (atomic_t *) filp->private_data;
-	// int v = atomic_read(counter);
-	// int len;
-	// atomic_inc(counter);
-	// char tmp[TMPSIZE];
-
-	// len = snprintf(tmp, TMPSIZE, "%d\n", v);
 	// if (*offset > len)
 	// 	return 0;
-	// if (count > len - *offset)
+	
+	// if (count > len - *offset) 
 	// 	count = len - *offset;
 
-	// if (copy_to_user(buf, files[0]->contents, count))
-	// 	return -EFAULT;
+	// if (copy_to_user(buf, files[j]->contents, count))
+	// 	return EFAULT;
 
 	// *offset += count;
 	// return count;
+
+	return 0;
 }
 
 
@@ -299,8 +281,7 @@ static int mount_tarfile() {
 		printk("No tar file specified.\n");
 		return 1;
 	}
-
-	char* filecontents;
+	
 	long filesize;
 	int tarfile_size;
 	int offset; 	// offset in tar file
@@ -320,10 +301,10 @@ static int mount_tarfile() {
 
 		offset = 0;
 
+		files[0] = (struct tarfile*) kmalloc(sizeof(struct tarfile*), GFP_KERNEL);
+		files[1] = (struct tarfile*) kmalloc(sizeof(struct tarfile*), GFP_KERNEL);
+		
 		for(j = 0; j < 2; j++) {
-			// malloc a new file in the array
-			files[j] = (struct tarfile*) kmalloc(sizeof(struct tarfile*), GFP_KERNEL);
-
 			// read in filename
 			for (i = 0 + offset; i < 100 + offset; i++) {
 				if (filecontents[i]) {				
@@ -348,34 +329,36 @@ static int mount_tarfile() {
 			// null terminate
 			files[j]->gid[8] = 0;
 			
-			// read in file size
-			for (i = 124 + offset; i < 136 + offset; i++) {
-				files[j]->size[i-(124 + offset)] = filecontents[i];
-			}
-			// null terminate
-			files[j]->size[12] = 0;
+			
+			// // read in file size
+			// for (i = 124 + offset; i < 136 + offset; i++) {
+			// 	size[i-(124 + offset)] = filecontents[i];
+			// }
+			
+			files[j]->size = octalStringToInt(&filecontents[124+offset], 11);
 
-			tarfile_size = octalStringToInt(files[j]->size, 11);
-
-			files[j]->contents = kmalloc(tarfile_size, GFP_KERNEL);
-
-			for (i = 512 + offset; i < 512 + tarfile_size + offset; i++) {
-				files[j]->contents[i - (512 + offset)] = filecontents[i];
-			}
-
-			// null terminate to be safe
-			files[j]->contents[tarfile_size] = 0;
-
+			// store contents offset
+			files[j]->contentOffset = 512 + offset;
+			tarfile_size = files[j]->size;
+			// tarfile_size = octalStringToInt(files[j]->size, 11);
+			
 			// update offset
 			offset = (offset + ((tarfile_size/512) + 1) * 512) + 512;
 		}
 
-		kfree(filecontents);
+		for (j = 0; j < 2; j++) {
+			printk("File name: %s\n", files[j]->name);
+			// printk("UID Octal: %s\n", files[j]->uid);
+			printk("UID: %d\n", octalStringToInt(files[j]->uid, 7));
+			printk("GID: %d\n", octalStringToInt(files[j]->gid, 7));
+			printk("File size: %d\n", files[j]->size);
+			//printk("File contents: %s\n", files[j]->contents);
+			printk("Contents begin at offset: %d\n", files[j]->contentOffset);
+			printk("\n");		
+		}
 
-		printk("Mounted");
 		return 0;
-	}
-	else {
+	} else {
 		printk("Failed to open file");
 		return 1;
 	}
