@@ -27,8 +27,8 @@ int main(int argc, char* argv[]) {
 	int tarfile_size;
 
 	// array to hold files
-	struct tarfile* files[2];
-	
+	struct tarfile* files[10];
+
 	// file handler
 	FILE* fh;
 
@@ -36,6 +36,7 @@ int main(int argc, char* argv[]) {
 	int i, j;
 
 	int byteCount;
+	int filecount = 0;
 
 	// offset in tar file
 	int offset = 0;	
@@ -105,51 +106,59 @@ int main(int argc, char* argv[]) {
 	// and store it in our array of struct
 	// ------------------------------
 	
-	for(j = 0; j < 2; j++) {
+	while(1) {
 
-		files[j] = (struct tarfile*) malloc(sizeof(struct tarfile*));
+		// end of archive when filename begins with 0
+		if (filecontents[offset] == 0) {
+			printf("End of archive.\n");
+			break;			
+		}
+
+		files[filecount] = (struct tarfile*) malloc(sizeof(struct tarfile*));
 
 		// read in filename
 		for (i = 0 + offset; i < 100 + offset; i++) {
 			if (filecontents[i]) {				
-				files[j]->name[i - (offset)] = filecontents[i];
+				files[filecount]->name[i - (offset)] = filecontents[i];
 			} else
 				break;
 		}
-		// null terminate
-		files[j]->name[i - offset] = 0;
+
+		// null terminate filename
+		files[filecount]->name[i - offset] = 0;
 		
 		// read in owner's numeric id	
-		for (i = 108 + offset; i < 116 + offset; i++) {			
-			files[j]->uid[i-(108 + offset)] = filecontents[i];
+		for (i = 108 + offset; i < 116 + offset; i++) {
+			files[filecount]->uid[i-(108 + offset)] = filecontents[i];
 		}
 		// null terminate
-		files[j]->uid[8] = 0;
+		files[filecount]->uid[8] = 0;
 
 		// read in group id
 		for (i = 116 + offset; i < 124 + offset; i++) {
-			files[j]->gid[i-(116 + offset)] = filecontents[i];
+			files[filecount]->gid[i-(116 + offset)] = filecontents[i];
 		}
 		// null terminate
-		files[j]->gid[8] = 0;
+		files[filecount]->gid[8] = 0;
 		
 		// read in file size
 		for (i = 124 + offset; i < 136 + offset; i++) {
-			files[j]->size[i-(124 + offset)] = filecontents[i];
+			files[filecount]->size[i-(124 + offset)] = filecontents[i];
 		}
 		// null terminate
-		files[j]->size[12] = 0;
+		files[filecount]->size[12] = 0;
 				
-		tarfile_size = octalStringToInt(files[j]->size, 11);
+		tarfile_size = octalStringToInt(files[filecount]->size, 11);
 
 		// store size of contents as an int
-		files[j]->size_int = tarfile_size;
+		files[filecount]->size_int = tarfile_size;
 
 		// store the offset in the original tarfile at which this file's contents begin
-		files[j]->contentOffset = 512 + offset;
+		files[filecount]->contentOffset = 512 + offset;
 
 		// update offset
 		offset = (offset + ((tarfile_size/512) + 1) * 512) + 512;
+		filecount++;
 	}
 
 	printf("%s\n", "------------------------------");
@@ -160,7 +169,7 @@ int main(int argc, char* argv[]) {
 	// Finished reading input tarfile
 	// ------------------------------
 
-
+	printf("Filecount: %d\n", filecount);
 
 	// ------------------------------
 	// List contents of the tarfile
@@ -172,7 +181,7 @@ int main(int argc, char* argv[]) {
 	printf("Listing contents: \n");
 	printf("%s\n", "------------------------------");
 
-	for (j = 0; j < 2; j++) {
+	for (j = 0; j < filecount; j++) {
 		printf("File name: %s\n", files[j]->name);
 		printf("UID: %d\n", octalStringToInt(files[j]->uid, 7));
 		printf("GID: %d\n", octalStringToInt(files[j]->gid, 7));
@@ -195,7 +204,7 @@ int main(int argc, char* argv[]) {
 
 	printf("\n");
 
-	for (j = 0; j < 2; j++) {
+	for (j = 0; j < filecount; j++) {
 		FILE* fh;
 		fh = fopen(files[j]->name, "w");
 		byteCount = fwrite(&filecontents[files[j]->contentOffset], 1, files[j]->size_int, fh);
@@ -217,12 +226,14 @@ int main(int argc, char* argv[]) {
 	// Free all malloc'ed memory
 	// ------------------------------
 
+	// according to gdb, this pointer is valid here
+	// yet free'ing it throws an invalid pointer exception
+	// free(filecontents);
+
 	// free all mallocs
-	for(j = 0; j < 2; j++) {
+	for(j = 0; j < filecount; j++) {
 		free(files[j]);
 	}
-
-	free(filecontents);
 
 	// ------------------------------
 	//       AND WE'RE DONE...
