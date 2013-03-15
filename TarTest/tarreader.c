@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
 	
 	filecontents = (char*)malloc(filesize + 1);		// +1 for null terminator
 
-	byteCount = fread(filecontents, filesize, 1, fh);
+	byteCount = fread(filecontents, 1, filesize, fh);
 	filecontents[filesize] = 0;	
 	
 	fclose(fh);
@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
 		printf("UID: %d\n", octalStringToInt(files[j]->uid, 7));
 		printf("GID: %d\n", octalStringToInt(files[j]->gid, 7));
 		printf("File size: %d\n", octalStringToInt(files[j]->size, 11));
-		printf("File contents begin at byte offset: %d\n", files[j]->contentOffset);
+		printf("Byte offset: %d\n", files[j]->contentOffset);
 		printf("\n");
 	}
 
