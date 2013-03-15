@@ -18,4 +18,5 @@ struct tarfile
   char prefix[155];             /* 345 */
                                 /* 500 */
   int contentOffset;
+  int size_int;
 };

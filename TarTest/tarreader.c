@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "tarreader.h"
 
 int octalStringToInt(char *string, unsigned int size){
@@ -12,10 +13,14 @@ int octalStringToInt(char *string, unsigned int size){
   return output;
 }
 
-void main() {
-	struct tarfile *file;	
+int main(int argc, char* argv[]) {
 
-	char* tarfile = "readme.tar";
+	// ------------------------------
+	//      Declare variables 
+	// ------------------------------
+
+	struct tarfile *file;
+	char* filename;
 	
 	char* filecontents;
 	long filesize;
@@ -23,23 +28,51 @@ void main() {
 
 	// array to hold files
 	struct tarfile* files[2];
-
-	// initial malloc needs to be larger than any possible realloc we do
-	// not sure why this is the case, but we're working around it now
-	// ny doing an initial malloc with a large enough size
-	// tarfile_contents = (char *)malloc(1024);
 	
 	// file handler
 	FILE* fh;
 
-	// loop countersP
+	// loop counters
 	int i, j;
+
+	int byteCount;
 
 	// offset in tar file
 	int offset = 0;	
 
+	// ------------------------------
+	//  End of variable declaration
+	// ------------------------------
+
+	// ------------------------------
+	//     Check input argument
+	// ------------------------------
+
+	if (argc < 2) {
+		printf("Please pass in path to tarfile as first argument.\n");
+		printf("Exiting.\n");
+		return 1;
+	} else {
+		filename = strdup(argv[1]);
+	}
+
+	// ------------------------------
+	//     End of input arg check
+	// ------------------------------
+
+
+	// ------------------------------
+	//     Read in the tarfile
+	// ------------------------------
+
 	// read in the file into a buffer
-	fh = fopen(tarfile, "r");
+	fh = fopen(filename, "r");
+
+	if (fh == NULL) {
+		printf("Unable to open %s.\n", filename);
+		printf("Exiting.\n");
+		return 1;
+	}
 
 	fseek(fh, 0L, SEEK_END);
 	filesize = ftell(fh);
@@ -47,11 +80,30 @@ void main() {
 	
 	filecontents = (char*)malloc(filesize + 1);		// +1 for null terminator
 
-	fread(filecontents, filesize, 1, fh);
+	byteCount = fread(filecontents, filesize, 1, fh);
 	filecontents[filesize] = 0;	
 	
 	fclose(fh);
-	// finished reading tar file and closed file handler	
+
+	if (byteCount != filesize) {
+		printf("Error reading %s.\n", filename);
+		printf("Expected filesize: %ld bytes.\n", filesize);
+		printf("Bytes read: %d bytes.\n", byteCount);
+		printf("Exiting.\n");
+		// return 1;
+	}
+	// finished reading tar file and closed file handler
+
+	// ------------------------------
+	// Finished reading tar file and
+	// closed file handle
+	// ------------------------------
+
+
+	// ------------------------------
+	// Decode the contents of the tarfile
+	// and store it in our array of struct
+	// ------------------------------
 	
 	for(j = 0; j < 2; j++) {
 
@@ -87,40 +139,94 @@ void main() {
 		}
 		// null terminate
 		files[j]->size[12] = 0;
-
-		// store contents offset
-		files[j]->contentOffset = 512 + offset;
+				
 		tarfile_size = octalStringToInt(files[j]->size, 11);
-		// files[j]->contents = (char*) malloc(tarfile_size + 1);
-		
-		// for (i = 512 + offset; i < 512 + tarfile_size + offset; i++) {
-		// 	files[j]->contents[i - (512 + offset)] = filecontents[i];
-		// }
 
-		// // null terminate
-		// files[j]->contents[tarfile_size] = 0;		
+		// store size of contents as an int
+		files[j]->size_int = tarfile_size;
+
+		// store the offset in the original tarfile at which this file's contents begin
+		files[j]->contentOffset = 512 + offset;
 
 		// update offset
 		offset = (offset + ((tarfile_size/512) + 1) * 512) + 512;
-		//filesize -= offset;
-		printf("New offset: %d\n", offset);
 	}
 
-	printf("%s\n", "---------------");
-	printf("Finished reading tarfiles. Listing contents: \n");
-	printf("%s\n", "---------------");
+	printf("%s\n", "------------------------------");
+	printf("Finished reading %s.\n", filename);
+	printf("%s\n", "------------------------------");
+
+	// ------------------------------
+	// Finished reading input tarfile
+	// ------------------------------
+
+
+
+	// ------------------------------
+	// List contents of the tarfile
+	// ------------------------------
+
+	printf("\n");
+
+	printf("%s\n", "------------------------------");
+	printf("Listing contents: \n");
+	printf("%s\n", "------------------------------");
 
 	for (j = 0; j < 2; j++) {
 		printf("File name: %s\n", files[j]->name);
-		// printf("UID Octal: %s\n", files[j]->uid);
 		printf("UID: %d\n", octalStringToInt(files[j]->uid, 7));
 		printf("GID: %d\n", octalStringToInt(files[j]->gid, 7));
 		printf("File size: %d\n", octalStringToInt(files[j]->size, 11));
-		//printf("File contents: %s\n", files[j]->contents);
-		printf("Contents begin at offset: %d\n", files[j]->contentOffset);
-		printf("\n");		
+		printf("File contents begin at byte offset: %d\n", files[j]->contentOffset);
+		printf("\n");
 	}
+
+	printf("\n");
+
+
+
+	// ------------------------------
+	// Extract the files tar'ed
+	// ------------------------------
 	
+	printf("%s\n", "------------------------------");
+	printf("Extracting files: \n");
+	printf("%s\n", "------------------------------");
+
+	printf("\n");
+
+	for (j = 0; j < 2; j++) {
+		FILE* fh;
+		fh = fopen(files[j]->name, "w");
+		byteCount = fwrite(&filecontents[files[j]->contentOffset], 1, files[j]->size_int, fh);
+
+		if (byteCount == files[j]->size_int) {
+			printf("Extracted file %s.\n", files[j]->name);
+		}
+	}
+
+	printf("\nExtracted all files.\n");
+
+	// ------------------------------
+	// Finished extracting files
+	// ------------------------------
+
+
 	
-	free(filecontents);	
+	// ------------------------------
+	// Free all malloc'ed memory
+	// ------------------------------
+
+	// free all mallocs
+	for(j = 0; j < 2; j++) {
+		free(files[j]);
+	}
+
+	free(filecontents);
+
+	// ------------------------------
+	//       AND WE'RE DONE...
+	// ------------------------------
+
+	return 0;
 }
