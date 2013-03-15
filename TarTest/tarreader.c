@@ -87,11 +87,9 @@ int main(int argc, char* argv[]) {
 	fclose(fh);
 
 	if (byteCount != filesize) {
-		printf("Error reading %s.\n", filename);
-		printf("Expected filesize: %ld bytes.\n", filesize);
-		printf("Bytes read: %d bytes.\n", byteCount);
+		printf("Error reading %s.\n", filename);		
 		printf("Exiting.\n");
-		// return 1;
+		return 1;
 	}
 	// finished reading tar file and closed file handler
 
