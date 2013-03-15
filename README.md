@@ -9,3 +9,15 @@
 [**Wiki for this project**](https://github.com/xbonez/CS-370/wiki/Project-5)
 
 -----
+**Description**
+
+For this assignment, we were required read the tar file format specifications and implement the tar fs module capable of mounting a tar file at a mount point.
+
+The work was done on the linux kernel (ver. 2.6.22.19). Compilation was done on Tux, using gcc (ver. 4.6.3). Versioning was done using Git, hosted on Github.
+
+This was an interesting, and challenging assignment. It really put our thinking to test.
+
+**Assignment Details**
+
+For this assignment, we first wrote a program called tarreader.c that can read a tar file, list each filename, file size, and other attributes in user space. We have provided a makefile to compile and run this program. The input tarfile is readme.tar and it has two files bar and foo. To compile and run this program, type make and make run. 
+We defined a struct called tarfile in tarreader.h file. This program basically opens up the input tarfile and then decodes the contents of the tarfile and stores them in an array tarfile structs. After that, it lists the contents of the tarfile and then extracts the files inside the tarfile. 
