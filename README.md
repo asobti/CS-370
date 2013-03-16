@@ -32,6 +32,6 @@ Utility functions to open / read files - `struct file* file_open(const char* pat
 `int file_read(struct file* file, unsigned long long offset, unsigned char* data, unsigned int size);` 
 Source: http://stackoverflow.com/questions/1184274/how-to-read-write-files-within-a-linux-kernel-module
 
-We wrote a program called **tar.c** [`/ linux-2.6.22.19-cs543 / fs / tar.c`] for mounting a tar file at a mount point. Our program successfully mounts the tarfile at the mount point and then lists the names of files inside. We were not able to print out the contents and then unmount the files. We tried a lot of different approaches to solve the problem. But we kept on getting a lot of segmentation faults. 
+We wrote a program called **tar.c** [`/ linux-2.6.22.19-cs543 / fs / tar.c`] for mounting a tar file at a mount point. Our program successfully mounts the tarfile at the mount point and then lists the names of files inside. We were not able to print out the contents and then unmount the tar file. We tried a lot of different approaches to solve the problem. But we kept on getting a lot of segmentation faults. 
 
 The mounting of the tar file and reading/listing of attributes and contents are done inside function `mount_tarfile()`. 
