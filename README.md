@@ -23,11 +23,11 @@ For this assignment, we first wrote a program called tarreader.c that can read a
 We defined a struct called tarfile in tarreader.h file. This program basically opens up the input tarfile and then decodes the contents of the tarfile and stores them in an array tarfile structs. After that, it lists the contents of the tarfile and then extracts the files inside the tarfile. 
 We used to some utility functions to accomplish this task.
 
-Utility function to convert an octal string to int - 'static int octalStringToInt(char *string, unsigned int size);'
+Utility function to convert an octal string to int - `static int octalStringToInt(char *string, unsigned int size);` 
 Source: http://stackoverflow.com/questions/2505042/how-to-parse-a-tar-file-in-c
 
-Utility functions to open / read files - 'struct file* file_open(const char* path, int flags, int rights);'
-'int file_read(struct file* file, unsigned long long offset, unsigned char* data, unsigned int size);'
+Utility functions to open / read files - `struct file* file_open(const char* path, int flags, int rights);`, 
+`int file_read(struct file* file, unsigned long long offset, unsigned char* data, unsigned int size);` 
 Source: http://stackoverflow.com/questions/1184274/how-to-read-write-files-within-a-linux-kernel-module
 
-We wrote a program called tar.c ['/ linux-2.6.22.19-cs543 / fs / tar.c']for mounting a tar file at a mount point . 
+We wrote a program called tar.c [`/ linux-2.6.22.19-cs543 / fs / tar.c`]for mounting a tar file at a mount point . 
